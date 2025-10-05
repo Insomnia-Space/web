@@ -1,0 +1,126 @@
+{
+  "folders": [
+    {
+      "name": "Telco Recommendation",
+      "path": ".",
+    },
+  ],
+  "settings": {
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "typescript.suggest.autoImports": true,
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "explicit",
+    },
+    "files.associations": {
+      "*.css": "tailwindcss",
+    },
+    "tailwindCSS.includeLanguages": {
+      "typescript": "javascript",
+      "typescriptreact": "javascript",
+    },
+    "tailwindCSS.experimental.classRegex": [
+      ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+      ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+    ],
+    "emmet.includeLanguages": {
+      "typescript": "html",
+      "typescriptreact": "html",
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/.next": true,
+      "**/coverage": true,
+    },
+    "files.watcherExclude": {
+      "**/node_modules/**": true,
+      "**/.next/**": true,
+      "**/dist/**": true,
+    },
+  },
+  "extensions": {
+    "recommendations": [
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "bradlc.vscode-tailwindcss",
+      "ms-vscode.vscode-typescript-next",
+      "formulahendry.auto-rename-tag",
+      "christian-kohler.path-intellisense",
+      "visualstudioexptteam.vscodeintellicode",
+      "ms-vscode.vscode-json",
+      "ms-vscode.vscode-jsx",
+      "yzhang.markdown-all-in-one",
+      "github.copilot",
+      "github.copilot-chat",
+      "ms-playwright.playwright",
+      "orta.vscode-jest",
+      "gruntfuggly.todo-tree",
+      "aaron-bond.better-comments",
+      "alefragnani.project-manager",
+      "ms-vscode.test-adapter-converter",
+    ],
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "type": "npm",
+        "script": "dev",
+        "group": "build",
+        "label": "Start Development Server",
+        "detail": "Run the Next.js development server",
+        "problemMatcher": [],
+      },
+      {
+        "type": "npm",
+        "script": "build",
+        "group": "build",
+        "label": "Build for Production",
+        "detail": "Build the application for production",
+      },
+      {
+        "type": "npm",
+        "script": "test",
+        "group": "test",
+        "label": "Run Tests",
+        "detail": "Run all tests with Jest",
+      },
+      {
+        "type": "npm",
+        "script": "lint",
+        "group": "build",
+        "label": "Lint Code",
+        "detail": "Check code quality with ESLint",
+      },
+      {
+        "type": "npm",
+        "script": "type-check",
+        "group": "build",
+        "label": "TypeScript Check",
+        "detail": "Check TypeScript types",
+      },
+    ],
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug Next.js",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/node_modules/.bin/next",
+        "args": ["dev"],
+        "console": "integratedTerminal",
+        "serverReadyAction": {
+          "pattern": "ready - started server on .+, url: (https?://.+)",
+          "uriFormat": "%s",
+          "action": "debugWithChrome",
+        },
+      },
+    ],
+  },
+}

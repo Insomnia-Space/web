@@ -1,4 +1,4 @@
-# Telco Recommendation System
+# The Telco Recommendation System
 
 A comprehensive platform for telecommunication service recommendations built with Next.js, TypeScript, and modern web technologies.
 

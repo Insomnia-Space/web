@@ -34,7 +34,7 @@ export default function UnauthorizedPage() {
           <div className="space-y-3 pt-2">
             <Button
               asChild
-              variant="outline"
+              variant="ghost"
               className="h-10 w-full rounded-lg border-yellow-200 text-base font-medium text-yellow-700 shadow-sm transition-all hover:bg-yellow-50"
             >
               <Link href="/auth/signin">Masuk</Link>

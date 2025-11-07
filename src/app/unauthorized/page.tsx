@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { User } from 'lucide-react';
 import Link from 'next/link';
 
 export default function UnauthorizedPage() {
@@ -10,20 +11,7 @@ export default function UnauthorizedPage() {
       <Card className="w-full max-w-sm rounded-xl border-none bg-white text-center shadow-sm">
         <CardHeader className="p-8">
           <div className="mx-auto mb-4 h-12 w-12 text-yellow-600 opacity-80">
-            <svg
-              className="h-full w-full"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 11c1.657 0 3-1.343 3-3V7a3 3 0 10-6 0v1c0 1.657 1.343 3 3 3zM5 11v7a2 2 0 002 2h10a2 2 0 002-2v-7"
-              />
-            </svg>
+            <User className="h-full w-full" />
           </div>
 
           <CardTitle className="text-xl font-semibold tracking-tight text-gray-800">

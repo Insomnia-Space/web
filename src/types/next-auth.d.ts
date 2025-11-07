@@ -1,5 +1,4 @@
-// types/next-auth.d.ts
-import NextAuth from 'next-auth';
+// import NextAuth from 'next-auth';
 
 declare module 'next-auth' {
   interface Session {
@@ -25,3 +24,5 @@ declare module 'next-auth/jwt' {
     role?: string;
   }
 }
+
+export {};

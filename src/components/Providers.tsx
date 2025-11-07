@@ -4,19 +4,21 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { SessionProvider } from 'next-auth/react';
-import { store, persistor } from '@/store';
+import type { Session } from 'next-auth';
+import { persistor, store } from '@/store';
 import { Toaster } from '@/components/ui/sonner';
+import LoadingPage from '@/app/loading';
 
 interface ProvidersProps {
   children: React.ReactNode;
-  session?: any;
+  session?: Session | null;
 }
 
 export function Providers({ children, session }: ProvidersProps) {
   return (
     <SessionProvider session={session}>
       <Provider store={store}>
-        <PersistGate loading={<div>Loading...</div>} persistor={persistor}>
+        <PersistGate loading={<LoadingPage />} persistor={persistor}>
           {children}
           <Toaster />
         </PersistGate>

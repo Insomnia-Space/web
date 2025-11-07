@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { ErrorMessage, Field, Form, Formik } from 'formik';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { loginSchema, LoginFormData } from '@/schemas/auth';
+import { LoginFormData, loginSchema } from '@/schemas/auth';
 
 interface LoginFormProps {
   onSubmit: (values: LoginFormData) => void;
@@ -63,7 +63,7 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
               </div>
             </CardContent>
 
-            <CardFooter>
+            <CardFooter className="mt-6">
               <Button type="submit" className="w-full" disabled={isSubmitting || isLoading}>
                 {isSubmitting || isLoading ? 'Loading...' : 'Login'}
               </Button>

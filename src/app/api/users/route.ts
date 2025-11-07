@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error fetching users:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
@@ -72,6 +73,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error creating user:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }

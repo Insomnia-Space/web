@@ -40,6 +40,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       }
       return initialValue;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`Error reading localStorage key "${key}":`, error);
       return initialValue;
     }
@@ -53,6 +54,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`Error setting localStorage key "${key}":`, error);
     }
   };

@@ -35,6 +35,7 @@ export const authOptions: NextAuthOptions = {
 
           return user;
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error('Authentication error:', error);
           return null;
         }

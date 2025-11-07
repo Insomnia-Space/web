@@ -63,6 +63,7 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Middleware error:', error);
     // On error, redirect to error page
     return NextResponse.redirect(new URL('/auth/error', request.url));

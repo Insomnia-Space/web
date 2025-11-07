@@ -1,58 +1,63 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import { Search } from 'lucide-react';
 
 export default function NotFoundPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md text-center">
-        <CardHeader>
-          <div className="mx-auto mb-4 h-24 w-24 text-blue-500">
-            <svg
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
+    <div className="flex min-h-screen items-center justify-center bg-white p-4 font-sans antialiased">
+      <Card className="w-full max-w-sm rounded-xl border-none bg-white text-center shadow-sm">
+        <CardHeader className="p-8">
+          <div className="mx-auto mb-4 h-12 w-12 text-blue-500 opacity-80">
+            <Search className="h-full w-full" />
           </div>
-          <CardTitle className="mb-2 text-4xl font-bold text-gray-900">404</CardTitle>
-          <CardTitle className="text-xl font-semibold text-gray-700">Page Not Found</CardTitle>
-          <CardDescription className="text-gray-600">
-            Sorry, we couldn't find the page you're looking for. The page might have been moved,
-            deleted, or you entered the wrong URL.
+
+          <CardTitle className="text-2xl font-semibold tracking-tight text-gray-800">
+            404 — Halaman Tidak Ditemukan
+          </CardTitle>
+          <CardDescription className="mt-1 text-sm text-gray-500">
+            Maaf, halaman yang Anda cari tidak ditemukan. Coba periksa kembali URL atau kembali ke
+            beranda.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Button asChild className="w-full">
-              <Link href="/">Go to Homepage</Link>
+
+        <CardContent className="space-y-6 px-8 pb-8">
+          <div className="space-y-3 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => window.location.reload()}
+              className="h-10 w-full rounded-lg border-blue-200 text-base font-medium text-blue-500 shadow-sm transition-all hover:bg-blue-50"
+            >
+              Cek Ulang
             </Button>
-            <Button variant="outline" asChild className="w-full">
-              <Link href="/dashboard">Go to Dashboard</Link>
+
+            <Button
+              variant="ghost"
+              asChild
+              className="h-10 w-full rounded-lg text-sm text-gray-500 transition-all hover:bg-gray-100"
+            >
+              <Link href="/">Kembali ke Beranda</Link>
             </Button>
           </div>
 
-          <div className="border-t pt-4">
-            <p className="mb-2 text-sm text-gray-500">Popular pages:</p>
-            <div className="space-y-1">
+          <div className="rounded-lg bg-blue-50 p-3 text-left">
+            <p className="text-xs font-medium text-gray-700">
+              Berikut beberapa halaman yang mungkin membantu:
+            </p>
+            <div className="mt-2 space-y-1">
               <Link
                 href="/auth/signin"
                 className="block text-sm text-blue-600 hover:text-blue-800 hover:underline"
               >
-                Sign In
+                Masuk
               </Link>
               <Link
                 href="/recommendations"
                 className="block text-sm text-blue-600 hover:text-blue-800 hover:underline"
               >
-                Recommendations
+                Rekomendasi
               </Link>
               <Link
                 href="/dashboard"
@@ -61,6 +66,17 @@ export default function NotFoundPage() {
                 Dashboard
               </Link>
             </div>
+          </div>
+
+          <div className="mt-4 text-xs text-gray-400">
+            Jika masalah berlanjut,{' '}
+            <a
+              className="text-blue-600 hover:underline"
+              href="mailto:support@telco-recommendation.com"
+            >
+              hubungi tim dukungan
+            </a>
+            .
           </div>
         </CardContent>
       </Card>

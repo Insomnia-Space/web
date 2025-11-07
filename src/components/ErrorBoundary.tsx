@@ -23,6 +23,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // eslint-disable-next-line no-console
     console.error('Error caught by ErrorBoundary:', error, errorInfo);
     // You can log to error reporting service here
   }
@@ -82,6 +83,7 @@ export function useErrorHandler() {
   }, []);
 
   const captureError = React.useCallback((error: Error) => {
+    // eslint-disable-next-line no-console
     console.error('Error captured:', error);
     setError(error);
   }, []);

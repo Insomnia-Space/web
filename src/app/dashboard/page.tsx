@@ -1,6 +1,6 @@
 'use client';
 
-import { MainLayout } from '@/components/layout/Layouts';
+import { DashboardLayout } from '@/components/layout/Layouts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,44 +26,47 @@ export default function DashboardPage() {
 
   if (!isAuthenticated) {
     return (
-      <MainLayout>
+      <DashboardLayout showSidebar={false}>
         <div className="flex min-h-[400px] items-center justify-center">
-          <Card className="w-full max-w-md text-center">
+          <Card className="w-full max-w-md rounded-xl text-center shadow-sm">
             <CardHeader>
-              <CardTitle>Access Denied</CardTitle>
-              <CardDescription>You need to be logged in to view this page.</CardDescription>
+              <CardTitle className="text-xl font-semibold text-gray-800">Access Denied</CardTitle>
+              <CardDescription className="text-gray-500">
+                You need to be logged in to view this page.
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button asChild>
+              <Button asChild className="w-full">
                 <a href="/auth/signin">Sign In</a>
               </Button>
             </CardContent>
           </Card>
         </div>
-      </MainLayout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <MainLayout>
+    <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {user?.name}!</p>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h1 className="mb-1 text-2xl font-semibold tracking-tight text-gray-800">Dashboard</h1>
+          <p className="text-sm text-gray-500">Welcome back, {user?.name}!</p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
-            <Card key={index}>
+            <Card key={index} className="rounded-xl border-gray-200 shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-700">{stat.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-muted-foreground text-xs">
-                  <span className="text-green-600">{stat.change}</span> from last month
+                <div className="text-2xl font-bold text-gray-800">{stat.value}</div>
+                <p className="mt-1 text-xs text-gray-500">
+                  <span className="font-semibold text-green-600">{stat.change}</span> from last
+                  month
                 </p>
               </CardContent>
             </Card>
@@ -71,53 +74,86 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Activities */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Card>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <Card className="rounded-xl border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle>Recent Activities</CardTitle>
-              <CardDescription>Latest user activities in your system</CardDescription>
+              <CardTitle className="text-lg font-semibold tracking-tight text-gray-800">
+                Recent Activities
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-500">
+                Latest user activities in your system
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {recentActivities.map(activity => (
-                  <div key={activity.id} className="flex items-center justify-between">
+                  <div
+                    key={activity.id}
+                    className="flex items-center justify-between border-b border-gray-100 pb-3 last:border-0 last:pb-0"
+                  >
                     <div>
-                      <p className="text-sm font-medium">{activity.action}</p>
-                      <p className="text-xs text-gray-500">{activity.user}</p>
+                      <p className="text-sm font-medium text-gray-800">{activity.action}</p>
+                      <p className="mt-0.5 text-xs text-gray-500">{activity.user}</p>
                     </div>
-                    <Badge variant="secondary">{activity.time}</Badge>
+                    <Badge
+                      variant="secondary"
+                      className="bg-blue-50 text-xs text-blue-600 hover:bg-blue-100"
+                    >
+                      {activity.time}
+                    </Badge>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="rounded-xl border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Frequently used actions</CardDescription>
+              <CardTitle className="text-lg font-semibold tracking-tight text-gray-800">
+                Quick Actions
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-500">
+                Frequently used actions
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               <Button
-                className="w-full justify-start"
+                className="w-full justify-start text-sm font-medium transition-all hover:bg-blue-50 hover:text-blue-600"
                 variant="outline"
                 onClick={() => setIsLoading(!isLoading)}
               >
                 Create New User
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button
+                className="w-full justify-start text-sm font-medium transition-all hover:bg-blue-50 hover:text-blue-600"
+                variant="outline"
+              >
                 Generate Report
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button
+                className="w-full justify-start text-sm font-medium transition-all hover:bg-blue-50 hover:text-blue-600"
+                variant="outline"
+              >
                 Export Data
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button
+                className="w-full justify-start text-sm font-medium transition-all hover:bg-blue-50 hover:text-blue-600"
+                variant="outline"
+              >
                 System Settings
               </Button>
             </CardContent>
           </Card>
         </div>
+
+        {/* Additional Info Card */}
+        <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
+          <p className="text-sm font-medium text-gray-700">
+            <span className="font-semibold text-blue-500">💡 Tip:</span> Use the sidebar to navigate
+            through different modules and features.
+          </p>
+        </div>
       </div>
-    </MainLayout>
+    </DashboardLayout>
   );
 }

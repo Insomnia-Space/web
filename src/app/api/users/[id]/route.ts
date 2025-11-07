@@ -30,6 +30,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       data: { user },
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error fetching user:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
@@ -54,6 +55,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       message: 'User updated successfully',
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error updating user:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
@@ -68,9 +70,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({
       success: true,
-      message: 'User deleted successfully',
+      message: `User with id ${id} deleted successfully`,
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error deleting user:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }

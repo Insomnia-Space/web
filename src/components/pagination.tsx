@@ -1,10 +1,8 @@
-'use client';
-
-import { cn } from '@/lib/utils';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
-  currentPage?: number;
-  totalPages?: number;
+  currentPage: number;
+  totalPages: number;
   onPageChange: (page: number) => void;
   itemsPerPage?: number;
   totalItems?: number;
@@ -12,7 +10,7 @@ interface PaginationProps {
   className?: string;
 }
 
-export default function Pagination({
+export function Pagination({
   currentPage = 1,
   totalPages = 1,
   onPageChange,
@@ -25,7 +23,7 @@ export default function Pagination({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   const getPageNumbers = () => {
-    const pages: number[] = [];
+    const pages: (number | string)[] = [];
     const showPages = 5;
 
     let startPage = Math.max(1, currentPage - Math.floor(showPages / 2));
@@ -35,13 +33,31 @@ export default function Pagination({
       startPage = Math.max(1, endPage - showPages + 1);
     }
 
+    // Always show first page
+    if (startPage > 1) {
+      pages.push(1);
+      if (startPage > 2) pages.push('...');
+    }
+
+    // Page numbers
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
+    }
+
+    // Always show last page
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) pages.push('...');
+      pages.push(totalPages);
     }
 
     return pages;
   };
 
+  if (totalPages <= 1) return null;
+
+  function cn(...classes: (string | false | null | undefined)[]): string {
+    return classes.filter(Boolean).join(' ');
+  }
   return (
     <div className={cn('flex items-center justify-between', className)}>
       {showInfo && (
@@ -57,34 +73,48 @@ export default function Pagination({
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
+          <ChevronLeft className="h-4 w-4" />
           Previous
         </button>
 
         {/* Page Numbers */}
-        {getPageNumbers().map(page => (
-          <button
-            key={page}
-            onClick={() => onPageChange(page)}
-            className={cn(
-              'rounded-md px-4 py-2 text-sm font-medium',
-              currentPage === page
-                ? 'bg-blue-600 text-white'
-                : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-            )}
-          >
-            {page}
-          </button>
-        ))}
+        <div className="hidden items-center gap-1 sm:flex">
+          {getPageNumbers().map((page, index) => (
+            <button
+              key={index}
+              onClick={() => typeof page === 'number' && onPageChange(page)}
+              disabled={page === '...'}
+              className={cn(
+                'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                currentPage === page
+                  ? 'bg-blue-600 text-white'
+                  : page === '...'
+                    ? 'cursor-default text-gray-400'
+                    : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+              )}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
+
+        {/* Mobile: Show current page */}
+        <div className="flex items-center gap-2 sm:hidden">
+          <span className="text-sm text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+        </div>
 
         {/* Next Button */}
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Next
+          <ChevronRight className="h-4 w-4" />
         </button>
       </div>
     </div>

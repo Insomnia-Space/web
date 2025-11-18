@@ -3,6 +3,7 @@
 import { DashboardLayout } from '@/components/layout/Layouts';
 import { ChevronLeft, ChevronRight, Filter, Search, UserCheck, UserX, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useEffect } from 'react';
 
 interface Customer {
   id: string;
@@ -98,6 +99,10 @@ export default function CustomerListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
+
   // Filter and search logic
   const filteredCustomers = useMemo(() => {
     return customers.filter(customer => {
@@ -118,11 +123,6 @@ export default function CustomerListPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentCustomers = filteredCustomers.slice(startIndex, endIndex);
-
-  // Reset to page 1 when filter/search changes
-  useMemo(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filterStatus]);
 
   // Statistics
   const stats = {

@@ -1,58 +1,43 @@
 import { cn } from '@/lib/utils';
-import { ReactNode } from 'react';
-import { TrendingDown, TrendingUp } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 
 interface KPICardProps {
-  title?: string;
-  value?: string | number;
-  icon?: ReactNode;
+  title: string;
+  value: string | number;
+  icon?: LucideIcon;
   trend?: {
     value: number;
     direction: 'up' | 'down';
   };
-  loading?: boolean;
-  color?: 'blue' | 'green' | 'yellow' | 'red' | 'purple';
   subtitle?: string;
+  color?: 'blue' | 'green' | 'yellow' | 'red' | 'purple';
   className?: string;
 }
 
-export default function KPICard({
-  title = '',
-  value = '',
-  icon = null,
-  trend = undefined,
-  loading = false,
+export function KPICard({
+  title,
+  value,
+  icon: Icon,
+  trend,
+  subtitle,
   color = 'blue',
-  subtitle = '',
-  className = '',
+  className,
 }: KPICardProps) {
   const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    green: 'bg-green-50 text-green-600',
-    yellow: 'bg-yellow-50 text-yellow-600',
-    red: 'bg-red-50 text-red-600',
-    purple: 'bg-purple-50 text-purple-600',
+    blue: 'bg-blue-100 text-blue-600',
+    green: 'bg-green-100 text-green-600',
+    yellow: 'bg-yellow-100 text-yellow-600',
+    red: 'bg-red-100 text-red-600',
+    purple: 'bg-purple-100 text-purple-600',
   };
 
-  if (loading) {
-    return (
-      <div className={cn('rounded-lg bg-white p-6 shadow-md', className)}>
-        <div className="animate-pulse">
-          <div className="mb-4 h-4 w-1/2 rounded bg-gray-200"></div>
-          <div className="h-8 w-3/4 rounded bg-gray-200"></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className={cn('rounded-lg bg-white p-6 shadow-md', className)}>
-      <div className="flex items-start justify-between">
+    <div className={cn('rounded-lg border border-gray-200 bg-white p-4', className)}>
+      <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="mb-2 text-sm font-medium text-gray-600">{title}</p>
-          <h3 className="text-3xl font-bold text-gray-900">{value}</h3>
+          <h3 className="text-2xl font-bold text-gray-900">{value}</h3>
 
-          {/* Subtitle or Trend */}
           {(subtitle || trend) && (
             <div className="mt-2 flex items-center gap-2">
               {trend && (
@@ -62,12 +47,7 @@ export default function KPICard({
                     trend.direction === 'up' ? 'text-green-600' : 'text-red-600'
                   )}
                 >
-                  {trend.direction === 'up' ? (
-                    <TrendingUp className="mr-1 h-4 w-4" />
-                  ) : (
-                    <TrendingDown className="mr-1 h-4 w-4" />
-                  )}
-                  {trend.value}%
+                  {trend.direction === 'up' ? '↑' : '↓'} {trend.value}%
                 </span>
               )}
               {subtitle && <span className="text-sm text-gray-500">{subtitle}</span>}
@@ -75,10 +55,9 @@ export default function KPICard({
           )}
         </div>
 
-        {/* Icon */}
-        {icon && (
-          <div className={cn('rounded-lg p-3', colorClasses[color])}>
-            <div className="h-6 w-6">{icon}</div>
+        {Icon && (
+          <div className={cn('rounded-full p-3', colorClasses[color])}>
+            <Icon className="h-6 w-6" />
           </div>
         )}
       </div>

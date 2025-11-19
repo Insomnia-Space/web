@@ -22,7 +22,7 @@ export function CustomerPagination({
   if (totalItems === 0) return null;
 
   return (
-    <div className="border-t border-gray-200 px-6 py-4">
+    <div className="flex justify-between border-t border-gray-200 px-6 py-4">
       {/* Results Info */}
       <div className="mb-4 text-sm text-gray-600">
         Showing {startIndex}-{endIndex} of {totalItems} customers

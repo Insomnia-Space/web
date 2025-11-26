@@ -82,8 +82,9 @@ export default function UserManagementPage() {
       setUsers(enriched);
       setPage(json.data.pagination.page);
       setTotalPages(json.data.pagination.totalPages);
-    } catch (e: any) {
-      toast.error(e.message || 'Error loading users');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err || 'Error loading users');
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -121,8 +122,9 @@ export default function UserManagementPage() {
       resetForm();
       // Refresh list
       fetchUsers(1, search);
-    } catch (e: any) {
-      toast.error(e.message || 'Error');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err || 'Error');
+      toast.error(msg);
     } finally {
       setCreating(false);
     }
@@ -141,8 +143,9 @@ export default function UserManagementPage() {
       if (!json.success) throw new Error(json.error || 'Gagal update status');
       toast.success(`Status user diubah menjadi ${nextStatus}`);
       setUsers(prev => prev.map(u => (u.id === user.id ? { ...u, status: nextStatus } : u)));
-    } catch (e: any) {
-      toast.error(e.message || 'Error mengubah status');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err || 'Error mengubah status');
+      toast.error(msg);
     }
   }
 

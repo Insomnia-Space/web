@@ -1,80 +1,71 @@
-import { NextRequest, NextResponse } from 'next/server';
+// import { NextRequest, NextResponse } from 'next/server';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
+// interface RouteParams {
+//   params: {
+//     id: string;
+//   };
+// }
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
-  try {
-    const { id } = params;
+// // Use context.params as a Promise<{ id: string }> to match Next.js types
+// export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+//   try {
+//     const { id } = await context.params;
 
-    // Simulate database query
-    // In real app, fetch from database
-    const user = {
-      id,
-      name: 'John Doe',
-      email: 'john@example.com',
-      role: 'user',
-      createdAt: '2024-01-01T00:00:00.000Z',
-      updatedAt: '2024-01-01T00:00:00.000Z',
-    };
+//     // Simulate DB fetch
+//     const user = {
+//       id,
+//       name: 'John Doe',
+//       email: 'john@example.com',
+//       role: 'user',
+//       createdAt: '2024-01-01T00:00:00.000Z',
+//       updatedAt: '2024-01-01T00:00:00.000Z',
+//     };
 
-    if (!user) {
-      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
-    }
+//     if (!user) {
+//       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+//     }
 
-    return NextResponse.json({
-      success: true,
-      data: { user },
-    });
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error fetching user:', error);
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
-  }
-}
+//     return NextResponse.json({ success: true, data: { user } });
+//   } catch (_err) {
+//     // TODO: send to monitoring service
+//     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+//   }
+// }
 
-export async function PUT(request: NextRequest, { params }: RouteParams) {
-  try {
-    const { id } = params;
-    const body = await request.json();
+// export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+//   try {
+//     const { id } = await context.params;
+//     const body = await request.json();
 
-    // Simulate updating user
-    // In real app, update in database
-    const updatedUser = {
-      id,
-      ...body,
-      updatedAt: new Date().toISOString(),
-    };
+//     // Simulate update
+//     const updatedUser = {
+//       id,
+//       ...body,
+//       updatedAt: new Date().toISOString(),
+//     };
 
-    return NextResponse.json({
-      success: true,
-      data: { user: updatedUser },
-      message: 'User updated successfully',
-    });
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error updating user:', error);
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
-  }
-}
+//     return NextResponse.json({
+//       success: true,
+//       data: { user: updatedUser },
+//       message: 'User updated successfully',
+//     });
+//   } catch (_err) {
+//     // TODO: send to monitoring service
+//     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+//   }
+// }
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
-  try {
-    const { id } = params;
+// export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+//   try {
+//     const { id } = await context.params;
 
-    // Simulate deleting user
-    // In real app, delete from database
-
-    return NextResponse.json({
-      success: true,
-      message: `User with id ${id} deleted successfully`,
-    });
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error deleting user:', error);
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
-  }
-}
+//     // Simulate delete
+//     return NextResponse.json({
+//       success: true,
+//       message: `User with id ${id} deleted successfully`,
+//     });
+//   } catch (_err) {
+//     // TODO: send to monitoring service
+//     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+//   }
+// }

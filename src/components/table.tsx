@@ -1,13 +1,13 @@
-import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 import { LoadingSpinner } from './loading-spinner';
 
-interface Column<T> {
+export interface Column<T> {
   key: string;
   label: string;
   width?: string;
   align?: 'left' | 'center' | 'right';
-  render?: (value: unknown, row: T, index: number) => ReactNode;
+  render?: (row: T, index: number) => ReactNode;
   sortable?: boolean;
 }
 
@@ -22,7 +22,8 @@ interface TableProps<T> {
   className?: string;
 }
 
-export function Table<T extends Record<string, unknown>>({
+// allow any object shape (don't require index signature)
+export function Table<T extends object>({
   columns,
   data,
   loading = false,
@@ -90,10 +91,10 @@ export function Table<T extends Record<string, unknown>>({
                     column.align === 'center' && 'text-center',
                     column.align === 'right' && 'text-right'
                   )}
-                >
+               >
                   {column.render
-                    ? column.render(row[column.key as keyof T] as unknown, row, rowIndex)
-                    : (row[column.key as keyof T] as ReactNode)}
+                    ? column.render(row, rowIndex)
+                    : ((row as unknown as Record<string, unknown>)[column.key] as ReactNode)}
                 </td>
               ))}
             </tr>

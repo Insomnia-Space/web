@@ -1,8 +1,8 @@
 // store/slices/productSlice.ts
 
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import type { RootState } from '../store';
-import type { Product, ProductDetail, ProductState } from '@/types/product.types';
+import type { RootState } from '../index';
+import type { Product, ProductDetail, ProductState, ProductStats } from '@/types/product-types';
 
 const initialState: ProductState = {
   items: [],

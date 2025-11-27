@@ -1,12 +1,12 @@
 'use client';
 
-import { Table } from '@/components/table';
+import { Column, Table } from '@/components/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAppSelector } from '@/store/hooks';
 import { selectPaginatedItems } from '@/store/slices/productCatalogSlice';
 import { useRouter } from 'next/navigation';
-import type { Product } from '@/types/product.types';
+import type { Product } from '@/types/product-types';
 import { cn } from '@/lib/utils';
 
 export function ProductTableView() {
@@ -14,7 +14,7 @@ export function ProductTableView() {
   const items = useAppSelector(selectPaginatedItems);
   const { loading } = useAppSelector(state => state.product);
 
-  const columns = [
+  const columns: Column<Product>[] = [
     {
       key: 'id',
       label: 'Product ID',
@@ -64,9 +64,7 @@ export function ProductTableView() {
     {
       key: 'description',
       label: 'Description',
-      render: (item: Product) => (
-        <p className="line-clamp-2 text-xs text-gray-600">{item.description}</p>
-      ),
+      render: (item: Product) => <p className="line-clamp-2 text-xs text-gray-600">{item.description}</p>,
     },
     {
       key: 'actions',
@@ -90,7 +88,7 @@ export function ProductTableView() {
 
   return (
     <div className="animate-in fade-in overflow-x-auto rounded-xl border border-gray-200 duration-300">
-      <Table
+      <Table<Product>
         columns={columns}
         data={items}
         loading={loading}

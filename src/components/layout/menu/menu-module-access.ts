@@ -1,130 +1,127 @@
-import {
-  Activity,
-  BookOpenCheck,
-  Component,
-  Database,
-  Droplets,
-  FlaskConical,
-  Home,
-  Package,
-} from 'lucide-react';
+import { Brain, LayoutDashboard, Package, Settings, Target, Users } from 'lucide-react';
 import { Menu, MenuItem } from './menu.dto';
 
 export const masterDataMenu: MenuItem[] = [
   {
-    title: 'Home',
-    url: '/home',
-    icon: Home,
-    moduleCode: 'TELCO-DASHBOARD',
-  },
-  {
-    title: 'Network',
+    title: 'Dashboard',
     url: '#',
-    icon: Droplets,
-    moduleCode: 'NETWORK',
-    children: [
-      { title: 'Topology', url: '/network/topology', moduleCode: 'NETWORK-TOPOLOGY' },
-      { title: 'Links', url: '/network/links', moduleCode: 'NETWORK-LINKS' },
-      { title: 'Performance', url: '/network/performance', moduleCode: 'NETWORK-PERFORMANCE' },
-    ],
-  },
-  {
-    title: 'OSS / BSS',
-    url: '#',
-    icon: Component,
-    moduleCode: 'OSS-BSS',
-    children: [
-      { title: 'Service Provisioning', url: '/oss/provisioning', moduleCode: 'OSS-PROVISIONING' },
-      { title: 'Inventory Sync', url: '/oss/inventory-sync', moduleCode: 'OSS-INVENTORY-SYNC' },
-    ],
-  },
-  {
-    title: 'Customer Management',
-    url: '#',
-    icon: BookOpenCheck,
-    moduleCode: 'CUSTOMER',
-    children: [
-      { title: 'Subscribers', url: '/customer/subscribers', moduleCode: 'CUSTOMER-SUBSCRIBERS' },
-      { title: 'Tickets', url: '/customer/tickets', moduleCode: 'CUSTOMER-TICKETS' },
-    ],
-  },
-  {
-    title: 'Inventory',
-    url: '#',
-    icon: Database,
-    moduleCode: 'INVENTORY',
-    children: [
-      { title: 'Devices', url: '/inventory/devices', moduleCode: 'INVENTORY-DEVICES' },
-      { title: 'Spare Parts', url: '/inventory/spares', moduleCode: 'INVENTORY-SPARES' },
-    ],
-  },
-  {
-    title: 'NOC',
-    url: '#',
-    icon: Activity,
-    moduleCode: 'NOC',
-    children: [
-      { title: 'Alarms', url: '/noc/alarms', moduleCode: 'NOC-ALARMS' },
-      { title: 'Incidents', url: '/noc/incidents', moduleCode: 'NOC-INCIDENTS' },
-    ],
-  },
-  {
-    title: 'Billing',
-    url: '#',
-    icon: Package,
-    moduleCode: 'BILLING',
-    children: [
-      { title: 'Invoices', url: '/billing/invoices', moduleCode: 'BILLING-INVOICES' },
-      { title: 'Usage', url: '/billing/usage', moduleCode: 'BILLING-USAGE' },
-    ],
-  },
-  {
-    title: 'Admin',
-    url: '#',
-    icon: FlaskConical,
-    moduleCode: 'ADMIN',
-    children: [
-      { title: 'Users', url: '/admin/users', moduleCode: 'ADMIN-USERS' },
-      { title: 'Roles', url: '/admin/roles', moduleCode: 'ADMIN-ROLES' },
-      { title: 'Settings', url: '/admin/settings', moduleCode: 'ADMIN-SETTINGS' },
-    ],
-  },
-];
-
-export const dashboardDataMenu: MenuItem[] = [
-  {
-    title: 'Network Dashboard',
-    url: '#',
-    icon: Droplets,
-    moduleCode: 'DASHBOARD-NETWORK',
+    icon: LayoutDashboard,
+    moduleCode: 'DASHBOARD',
     children: [
       {
         title: 'Overview',
-        url: '/dashboard/network/overview',
-        moduleCode: 'DASHBOARD-NETWORK-OVERVIEW',
+        url: '/dashboard',
+        moduleCode: 'DASHBOARD-OVERVIEW',
       },
       {
-        title: 'Capacity',
-        url: '/dashboard/network/capacity',
-        moduleCode: 'DASHBOARD-NETWORK-CAPACITY',
+        title: 'Product Performance',
+        url: '/dashboard/products',
+        moduleCode: 'DASHBOARD-PRODUCTS',
+      },
+      {
+        title: 'Analytics',
+        url: '/dashboard/analytics',
+        moduleCode: 'DASHBOARD-ANALYTICS',
       },
     ],
   },
   {
-    title: 'Business Dashboard',
+    title: 'Customers',
     url: '#',
-    icon: Package,
-    moduleCode: 'DASHBOARD-BUSINESS',
+    icon: Users,
+    moduleCode: 'CUSTOMER',
     children: [
       {
-        title: 'Revenue',
-        url: '/dashboard/business/revenue',
-        moduleCode: 'DASHBOARD-BUSINESS-REVENUE',
+        title: 'Customer List',
+        url: '/customers',
+        moduleCode: 'CUSTOMER-LIST',
       },
       {
-        title: 'Subscribers',
-        url: '/dashboard/business/subscribers',
-        moduleCode: 'DASHBOARD-BUSINESS-SUBSCRIBERS',
+        title: 'Customer Segments',
+        url: '/customers/segments',
+        moduleCode: 'CUSTOMER-SEGMENTS',
+      },
+    ],
+  },
+  {
+    title: 'Recommendations',
+    url: '#',
+    icon: Target,
+    moduleCode: 'RECOMMENDATION',
+    children: [
+      {
+        title: 'History',
+        url: '/recommendations',
+        moduleCode: 'RECOMMENDATION-HISTORY',
+      },
+      {
+        title: 'Generate New',
+        url: '/recommendations/generate',
+        moduleCode: 'RECOMMENDATION-GENERATE',
+      },
+      {
+        title: 'Performance',
+        url: '/recommendations/performance',
+        moduleCode: 'RECOMMENDATION-PERFORMANCE',
+      },
+    ],
+  },
+  {
+    title: 'Products',
+    url: '#',
+    icon: Package,
+    moduleCode: 'PRODUCT',
+    children: [
+      {
+        title: 'Product Catalog',
+        url: '/products',
+        moduleCode: 'PRODUCT-CATALOG',
+      },
+      {
+        title: 'Categories',
+        url: '/products/categories',
+        moduleCode: 'PRODUCT-CATEGORIES',
+      },
+    ],
+  },
+  {
+    title: 'ML Model',
+    url: '#',
+    icon: Brain,
+    moduleCode: 'ML-MODEL',
+    children: [
+      {
+        title: 'Model Information',
+        url: '/ml-model/info',
+        moduleCode: 'ML-MODEL-INFO',
+      },
+      {
+        title: 'Model Performance',
+        url: '/ml-model/performance',
+        moduleCode: 'ML-MODEL-PERFORMANCE',
+      },
+    ],
+  },
+  {
+    title: 'Settings',
+    url: '#',
+    icon: Settings,
+    moduleCode: 'SETTINGS',
+    children: [
+      {
+        title: 'My Profile',
+        url: '/settings/profile',
+        moduleCode: 'SETTINGS-PROFILE',
+      },
+      {
+        title: 'User Management',
+        url: '/settings/users',
+        moduleCode: 'SETTINGS-USERS',
+      },
+      {
+        title: 'System Settings',
+        url: '/settings/system',
+        moduleCode: 'SETTINGS-SYSTEM',
       },
     ],
   },
@@ -132,11 +129,7 @@ export const dashboardDataMenu: MenuItem[] = [
 
 export const menus: Menu[] = [
   {
-    label: 'Telco System',
+    label: 'Telco Recommendation System',
     items: masterDataMenu,
-  },
-  {
-    label: 'Dashboards',
-    items: dashboardDataMenu,
   },
 ];

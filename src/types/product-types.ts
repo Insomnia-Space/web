@@ -1,25 +1,37 @@
-// types/product.types.ts
-
 export interface Product {
   id: string;
+  product_code: string;
   name: string;
-  category: 'Data' | 'Voice' | 'Combo';
-  price: number;
+  category: 'data' | 'voice' | 'combo' | 'addon';
+  price: string;
   description: string;
-  createdAt: string;
-  updatedAt: string;
+  data_quota: string | null;
+  call_minutes: string | null;
+  sms_count: string | null;
+  validity_days: number | null;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface ProductDetail extends Product {
-  features?: string[];
-  terms?: string;
-  quota?: string;
-  validity?: string;
+// ✅ Fixed: Use type alias instead of empty interface
+export type ProductDetail = Product;
+
+export interface ProductCategory {
+  category: string;
+  display_name: string;
+  count: number;
+  price_range: {
+    min: string;
+    max: string;
+  };
 }
 
 export interface ProductFilters {
   searchTerm: string;
-  category: 'All' | 'Data' | 'Voice' | 'Combo';
+  category: 'All' | 'data' | 'voice' | 'combo' | 'addon' | '';
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 export interface ProductStats {
@@ -27,10 +39,34 @@ export interface ProductStats {
   data: number;
   voice: number;
   combo: number;
+  addon: number;
+}
+
+export interface CreateProductDto {
+  name: string;
+  category: 'data' | 'voice' | 'combo' | 'addon';
+  price: number;
+  description: string;
+  data_quota?: string;
+  call_minutes?: string;
+  sms_count?: string;
+  validity_days?: number;
+}
+
+export interface UpdateProductDto {
+  name?: string;
+  category?: 'data' | 'voice' | 'combo' | 'addon';
+  price?: number;
+  description?: string;
+  data_quota?: string;
+  call_minutes?: string;
+  sms_count?: string;
+  validity_days?: number;
 }
 
 export interface ProductState {
   items: Product[];
+  categories: ProductCategory[];
   filteredItems: Product[];
   filters: ProductFilters;
   pagination: {
@@ -40,8 +76,8 @@ export interface ProductState {
     totalPages: number;
   };
   selectedItem: ProductDetail | null;
-  viewMode: 'grid' | 'table';
   loading: boolean;
   error: string | null;
   stats: ProductStats;
+  viewMode: 'grid' | 'table';
 }

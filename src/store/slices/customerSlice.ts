@@ -1,331 +1,292 @@
-import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type {
+  CreateCustomerDto,
+  Customer,
+  CustomerState,
+  UpdateCustomerDto,
+} from '@/types/customer-types';
+import { CustomerService } from '@/services/customer.service';
 
-// ==================== TYPES ====================
-export interface Customer {
-  id: string;
-  name: string;
-  age: number;
-  status: 'Active' | 'Churned';
-  clvSegment: 'High' | 'Medium' | 'Low';
-}
-
-export interface CustomerDetail extends Customer {
-  gender: 'Male' | 'Female';
-  location: string;
-  occupation: string;
-  email: string;
-  phone: string;
-  currentPlan: string;
-  joinDate: string;
-  avgDataUsage: number;
-  callDuration: number;
-  smsCount: number;
-  transactions: Transaction[];
-}
-
-export interface Transaction {
-  id: string;
-  product: string;
-  date: string;
-  price: number;
-}
-
-export interface CustomerFilters {
-  searchTerm: string;
-  status: 'All' | 'Active' | 'Churned';
-}
-
-export interface PaginationState {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-}
-
-interface CustomerState {
-  // List State
-  customers: Customer[];
-  filteredCustomers: Customer[];
-  filters: CustomerFilters;
-  pagination: PaginationState;
-
-  // Detail State
-  selectedCustomer: CustomerDetail | null;
-
-  // Loading & Error States
-  loading: boolean;
-  error: string | null;
-
-  // Stats
-  stats: {
-    total: number;
-    active: number;
-    churned: number;
-  };
-}
-
-// ==================== INITIAL STATE ====================
 const initialState: CustomerState = {
-  customers: [],
-  filteredCustomers: [],
+  items: [],
+  statistics: null,
   filters: {
     searchTerm: '',
-    status: 'All',
+    status: 'all',
+    clv_segment: 'all',
+    gender: 'all',
+    sortBy: 'name',
+    sortOrder: 'asc',
   },
   pagination: {
-    currentPage: 1,
-    itemsPerPage: 20,
-    totalItems: 0,
-    totalPages: 0,
+    total: 0,
+    count: 0,
+    per_page: 20,
+    current_page: 1,
+    total_pages: 0,
+    offset: 0,
   },
-  selectedCustomer: null,
+  selectedItem: null,
   loading: false,
   error: null,
-  stats: {
-    total: 0,
-    active: 0,
-    churned: 0,
-  },
 };
 
-// ==================== ASYNC THUNKS ====================
-
-// Fetch all customers
+// Async Thunks
 export const fetchCustomers = createAsyncThunk(
-  'customers/fetchCustomers',
+  'customers/fetchAll',
+  async (params: {
+    page?: number;
+    limit?: number;
+    filters?: CustomerState['filters'];
+  } = {}, { rejectWithValue }) => {
+    try {
+      const { page = 1, limit = 20, filters } = params;
+      
+      const response = await CustomerService.getAll({
+        page,
+        limit,
+        status: filters?.status !== 'all' ? filters?.status : undefined,
+        clv_segment: filters?.clv_segment !== 'all' ? filters?.clv_segment : undefined,
+        gender: filters?.gender !== 'all' ? filters?.gender : undefined,
+        sort_by: filters?.sortBy,
+        sort_order: filters?.sortOrder,
+        search: filters?.searchTerm || undefined,
+      });
+
+      return response;
+    } catch (error) {
+      // ✅ Fixed: Removed 'any' type
+      const message = error instanceof Error ? error.message : 'Failed to fetch customers';
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchCustomerStatistics = createAsyncThunk(
+  'customers/fetchStatistics',
   async (_, { rejectWithValue }) => {
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch('/api/customers');
-      if (!response.ok) throw new Error('Failed to fetch customers');
-      const data = await response.json();
+      const data = await CustomerService.getStatistics();
       return data;
     } catch (error) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An unknown error occurred');
+      // ✅ Fixed: Removed 'any' type
+      const message = error instanceof Error ? error.message : 'Failed to fetch statistics';
+      return rejectWithValue(message);
     }
   }
 );
 
-// Fetch single customer detail
 export const fetchCustomerDetail = createAsyncThunk(
-  'customers/fetchCustomerDetail',
-  async (customerId: string, { rejectWithValue }) => {
+  'customers/fetchDetail',
+  async (id: string, { rejectWithValue }) => {
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch(`/api/customers/${customerId}`);
-      if (!response.ok) throw new Error('Failed to fetch customer detail');
-      const data = await response.json();
+      const data = await CustomerService.getById(id);
       return data;
     } catch (error) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An unknown error occurred');
+      // ✅ Fixed: Removed 'any' type
+      const message = error instanceof Error ? error.message : 'Failed to fetch customer detail';
+      return rejectWithValue(message);
     }
   }
 );
 
-// Generate recommendation
-export const generateRecommendation = createAsyncThunk(
-  'customers/generateRecommendation',
-  async (customerId: string, { rejectWithValue }) => {
+export const createCustomer = createAsyncThunk(
+  'customers/create',
+  async (data: CreateCustomerDto, { rejectWithValue }) => {
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch('/api/recommendations/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId }),
-      });
-      if (!response.ok) throw new Error('Failed to generate recommendation');
-      const data = await response.json();
-      return data;
+      const customer = await CustomerService.create(data);
+      return customer;
     } catch (error) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An unknown error occurred');
+      // ✅ Fixed: Removed 'any' type
+      const message = error instanceof Error ? error.message : 'Failed to create customer';
+      return rejectWithValue(message);
     }
   }
 );
 
-// ==================== SLICE ====================
+export const updateCustomer = createAsyncThunk(
+  'customers/update',
+  async ({ id, data }: { id: string; data: UpdateCustomerDto }, { rejectWithValue }) => {
+    try {
+      const customer = await CustomerService.update(id, data);
+      return customer;
+    } catch (error) {
+      // ✅ Fixed: Removed 'any' type
+      const message = error instanceof Error ? error.message : 'Failed to update customer';
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const deleteCustomer = createAsyncThunk(
+  'customers/delete',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      await CustomerService.delete(id);
+      return id;
+    } catch (error) {
+      // ✅ Fixed: Removed 'any' type
+      const message = error instanceof Error ? error.message : 'Failed to delete customer';
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const customerSlice = createSlice({
   name: 'customers',
   initialState,
   reducers: {
-    // Set search term
+    // Filters
     setSearchTerm: (state, action: PayloadAction<string>) => {
       state.filters.searchTerm = action.payload;
-      state.pagination.currentPage = 1; // Reset to first page
-      applyFilters(state);
     },
 
-    // Set status filter
-    setStatusFilter: (state, action: PayloadAction<'All' | 'Active' | 'Churned'>) => {
+    setStatusFilter: (state, action: PayloadAction<CustomerState['filters']['status']>) => {
       state.filters.status = action.payload;
-      state.pagination.currentPage = 1; // Reset to first page
-      applyFilters(state);
     },
 
-    // Clear filters
-    clearFilters: state => {
-      state.filters = initialState.filters;
-      state.filteredCustomers = state.customers;
-      state.pagination.currentPage = 1;
-      calculatePagination(state);
+    setCLVSegmentFilter: (state, action: PayloadAction<CustomerState['filters']['clv_segment']>) => {
+      state.filters.clv_segment = action.payload;
     },
 
-    // Set current page
+    setGenderFilter: (state, action: PayloadAction<CustomerState['filters']['gender']>) => {
+      state.filters.gender = action.payload;
+    },
+
+    setSorting: (state, action: PayloadAction<{ sortBy: CustomerState['filters']['sortBy']; sortOrder: CustomerState['filters']['sortOrder'] }>) => {
+      state.filters.sortBy = action.payload.sortBy;
+      state.filters.sortOrder = action.payload.sortOrder;
+    },
+
+    // Pagination
     setCurrentPage: (state, action: PayloadAction<number>) => {
-      state.pagination.currentPage = action.payload;
+      state.pagination.current_page = action.payload;
     },
 
-    // Set items per page
-    setItemsPerPage: (state, action: PayloadAction<number>) => {
-      state.pagination.itemsPerPage = action.payload;
-      state.pagination.currentPage = 1; // Reset to first page
-      calculatePagination(state);
+    // Detail
+    setSelectedItem: (state, action: PayloadAction<Customer | null>) => {
+      state.selectedItem = action.payload;
     },
 
-    // Clear selected customer
-    clearSelectedCustomer: state => {
-      state.selectedCustomer = null;
+    // Reset
+    resetFilters: (state) => {
+      state.filters = initialState.filters;
     },
 
-    // Set customers (for mock data)
-    setCustomers: (state, action: PayloadAction<Customer[]>) => {
-      state.customers = action.payload;
-      state.filteredCustomers = action.payload;
-      calculateStats(state);
-      calculatePagination(state);
+    clearError: (state) => {
+      state.error = null;
     },
   },
-  extraReducers: builder => {
+  extraReducers: (builder) => {
     // Fetch Customers
     builder
-      .addCase(fetchCustomers.pending, state => {
+      .addCase(fetchCustomers.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchCustomers.fulfilled, (state, action) => {
         state.loading = false;
-        state.customers = action.payload;
-        state.filteredCustomers = action.payload;
-        calculateStats(state);
-        calculatePagination(state);
+        state.items = action.payload.customers;
+        state.pagination = action.payload.pagination;
       })
       .addCase(fetchCustomers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
 
-    // Fetch Customer Detail
+    // Fetch Statistics
     builder
-      .addCase(fetchCustomerDetail.pending, state => {
+      .addCase(fetchCustomerStatistics.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCustomerStatistics.fulfilled, (state, action) => {
+        state.loading = false;
+        state.statistics = action.payload;
+      })
+      .addCase(fetchCustomerStatistics.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Fetch Detail
+    builder
+      .addCase(fetchCustomerDetail.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchCustomerDetail.fulfilled, (state, action) => {
         state.loading = false;
-        state.selectedCustomer = action.payload;
+        state.selectedItem = action.payload;
       })
       .addCase(fetchCustomerDetail.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
 
-    // Generate Recommendation
+    // Create Customer
     builder
-      .addCase(generateRecommendation.pending, state => {
+      .addCase(createCustomer.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(generateRecommendation.fulfilled, state => {
+      .addCase(createCustomer.fulfilled, (state, action) => {
         state.loading = false;
-        // Handle success (e.g., show toast notification)
+        state.items.unshift(action.payload);
       })
-      .addCase(generateRecommendation.rejected, (state, action) => {
+      .addCase(createCustomer.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Update Customer
+    builder
+      .addCase(updateCustomer.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateCustomer.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.items.findIndex((item) => item.id === action.payload.id);
+        if (index !== -1) {
+          state.items[index] = action.payload;
+        }
+        if (state.selectedItem?.id === action.payload.id) {
+          state.selectedItem = action.payload;
+        }
+      })
+      .addCase(updateCustomer.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // Delete Customer
+    builder
+      .addCase(deleteCustomer.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteCustomer.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = state.items.filter((item) => item.id !== action.payload);
+      })
+      .addCase(deleteCustomer.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
   },
 });
 
-// ==================== HELPER FUNCTIONS ====================
-
-// Apply filters to customer list
-function applyFilters(state: CustomerState) {
-  let filtered = state.customers;
-
-  // Apply status filter
-  if (state.filters.status !== 'All') {
-    filtered = filtered.filter(c => c.status === state.filters.status);
-  }
-
-  // Apply search filter
-  if (state.filters.searchTerm) {
-    const search = state.filters.searchTerm.toLowerCase();
-    filtered = filtered.filter(
-      c => c.id.toLowerCase().includes(search) || c.name.toLowerCase().includes(search)
-    );
-  }
-
-  state.filteredCustomers = filtered;
-  calculatePagination(state);
-}
-
-// Calculate pagination
-function calculatePagination(state: CustomerState) {
-  state.pagination.totalItems = state.filteredCustomers.length;
-  state.pagination.totalPages = Math.ceil(
-    state.filteredCustomers.length / state.pagination.itemsPerPage
-  );
-}
-
-// Calculate statistics
-function calculateStats(state: CustomerState) {
-  state.stats.total = state.customers.length;
-  state.stats.active = state.customers.filter(c => c.status === 'Active').length;
-  state.stats.churned = state.customers.filter(c => c.status === 'Churned').length;
-}
-
-// ==================== EXPORTS ====================
 export const {
   setSearchTerm,
   setStatusFilter,
-  clearFilters,
+  setCLVSegmentFilter,
+  setGenderFilter,
+  setSorting,
   setCurrentPage,
-  setItemsPerPage,
-  clearSelectedCustomer,
-  setCustomers,
+  setSelectedItem,
+  resetFilters,
+  clearError,
 } = customerSlice.actions;
 
 export default customerSlice.reducer;
-
-// ==================== SELECTORS ====================
-
-// Get paginated customers
-export const selectPaginatedCustomers = (state: { customers: CustomerState }) => {
-  const { filteredCustomers, pagination } = state.customers;
-  const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
-  const endIndex = startIndex + pagination.itemsPerPage;
-  return filteredCustomers.slice(startIndex, endIndex);
-};
-
-// Get current page info
-export const selectPageInfo = (state: { customers: CustomerState }) => {
-  const { pagination } = state.customers;
-  const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
-  const endIndex = Math.min(startIndex + pagination.itemsPerPage, pagination.totalItems);
-
-  return {
-    startIndex: startIndex + 1,
-    endIndex,
-    totalItems: pagination.totalItems,
-    currentPage: pagination.currentPage,
-    totalPages: pagination.totalPages,
-  };
-};

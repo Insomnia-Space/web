@@ -1,90 +1,148 @@
 'use client';
 
 import SearchBar from '@/components/search-bar';
+import Filter from '@/components/filter';
 import { Button } from '@/components/ui/button';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Sliders } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setCategoryFilter, setSearchTerm } from '@/store/slices/productCatalogSlice';
-import { cn } from '@/lib/utils';
-
-const categories = ['Data', 'Voice', 'Combo'] as const;
+import {
+  resetFilters,
+  setCategoryFilter,
+  setSearchTerm,
+  setPriceRange,
+  fetchProducts,
+} from '@/store/slices/productSlice';
+import { useState, useEffect, useRef } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export function ProductFilters() {
   const dispatch = useAppDispatch();
-  const { filters, items } = useAppSelector(state => state.product);
+  const { filters, categories } = useAppSelector((state) => state.product);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [localMinPrice, setLocalMinPrice] = useState<string>('');
+  const [localMaxPrice, setLocalMaxPrice] = useState<string>('');
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    // Skip first render to avoid conflict with page.tsx fetchProducts
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      dispatch(fetchProducts({}));
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [filters.searchTerm, filters.category, filters.minPrice, filters.maxPrice, dispatch]);
+
+  const categoryOptions = [
+    { value: 'All', label: 'All Categories' },
+    ...(categories && categories.length > 0
+      ? categories.map((cat) => ({
+          value: cat.category,
+          label: `${cat.display_name} (${cat.count})`,
+        }))
+      : [
+          { value: 'data', label: 'Data' },
+          { value: 'voice', label: 'Voice' },
+          { value: 'combo', label: 'Combo' },
+          { value: 'addon', label: 'Add-on' },
+        ]),
+  ];
+
+  const handlePriceFilter = () => {
+    dispatch(
+      setPriceRange({
+        min: localMinPrice ? Number(localMinPrice) : undefined,
+        max: localMaxPrice ? Number(localMaxPrice) : undefined,
+      })
+    );
+  };
+
+  const handleReset = () => {
+    dispatch(resetFilters());
+    setLocalMinPrice('');
+    setLocalMaxPrice('');
+  };
 
   return (
     <div className="space-y-4">
-      {/* Search Bar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="w-full">
         <SearchBar
           value={filters.searchTerm}
-          onChange={value => dispatch(setSearchTerm(value))}
-          placeholder="Cari nama produk, ID, atau deskripsi..."
-          className="max-w-md flex-1"
+          onChange={(value) => dispatch(setSearchTerm(value))}
+          placeholder="Search products by name or code..."
+          className="w-full"
         />
+      </div>
+
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="w-full sm:w-64">
+            <Filter
+              options={categoryOptions}
+              value={filters.category}
+              onChange={(value) =>
+                dispatch(setCategoryFilter(value as typeof filters.category))
+              }
+              placeholder="Category"
+            />
+          </div>
+
+          <Button
+            variant="outline"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="gap-2"
+          >
+            <Sliders className="h-4 w-4" />
+            {showAdvanced ? 'Hide' : 'Show'} Price Filter
+          </Button>
+        </div>
+
         <Button
           variant="outline"
-          onClick={() => dispatch(resetFilters())}
-          className="gap-2 transition-all hover:bg-gray-100"
+          onClick={handleReset}
+          className="w-full gap-2 sm:w-auto sm:flex-shrink-0"
         >
           <RotateCcw className="h-4 w-4" />
-          Reset Filters
+          Reset
         </Button>
       </div>
 
-      {/* Category Filters */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => dispatch(setCategoryFilter('All'))}
-          className={cn(
-            'relative rounded-lg px-4 py-2 text-sm font-medium transition-all',
-            'hover:scale-105 active:scale-95',
-            filters.category === 'All'
-              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-200'
-              : 'border border-gray-200 bg-white text-gray-700 hover:border-purple-300 hover:bg-purple-50'
-          )}
-        >
-          All Products
-          {filters.category === 'All' && (
-            <span className="absolute -top-1 -right-1 flex h-5 w-5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
-              <span className="relative inline-flex h-5 w-5 rounded-full bg-purple-500"></span>
-            </span>
-          )}
-        </button>
-
-        {categories.map(cat => {
-          const count = items.filter(p => p.category === cat).length;
-          return (
-            <button
-              key={cat}
-              onClick={() => dispatch(setCategoryFilter(cat))}
-              className={cn(
-                'relative rounded-lg px-4 py-2 text-sm font-medium transition-all',
-                'hover:scale-105 active:scale-95',
-                filters.category === cat
-                  ? cat === 'Data'
-                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-200'
-                    : cat === 'Voice'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-200'
-                      : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-200'
-                  : 'border border-gray-200 bg-white text-gray-700 hover:border-purple-300 hover:bg-purple-50'
-              )}
-            >
-              <span>{cat}</span>
-              <span
-                className={cn(
-                  'ml-1.5 rounded-full px-1.5 py-0.5 text-xs',
-                  filters.category === cat ? 'bg-white/20' : 'bg-gray-100'
-                )}
-              >
-                {count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {showAdvanced && (
+        <div className="rounded-lg border bg-white p-4">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="minPrice">Min Price</Label>
+              <Input
+                id="minPrice"
+                type="number"
+                placeholder="0"
+                value={localMinPrice}
+                onChange={(e) => setLocalMinPrice(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="maxPrice">Max Price</Label>
+              <Input
+                id="maxPrice"
+                type="number"
+                placeholder="1000000"
+                value={localMaxPrice}
+                onChange={(e) => setLocalMaxPrice(e.target.value)}
+              />
+            </div>
+            <div className="flex items-end">
+              <Button onClick={handlePriceFilter} className="w-full">
+                Apply Price Filter
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { Column, Table } from '@/components/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAppSelector } from '@/store/hooks';
-import { selectPaginatedItems } from '@/store/slices/productCatalogSlice';
+import { selectPaginatedItems } from '@/store/slices/productSlice';
 import { useRouter } from 'next/navigation';
 import type { Product } from '@/types/product-types';
 import { cn } from '@/lib/utils';
@@ -14,12 +14,19 @@ export function ProductTableView() {
   const items = useAppSelector(selectPaginatedItems);
   const { loading } = useAppSelector(state => state.product);
 
+  const categoryColors = {
+    data: 'bg-blue-100 text-blue-700',
+    voice: 'bg-amber-100 text-amber-700',
+    combo: 'bg-purple-100 text-purple-700',
+    addon: 'bg-green-100 text-green-700',
+  };
+
   const columns: Column<Product>[] = [
     {
-      key: 'id',
-      label: 'Product ID',
+      key: 'product_code',
+      label: 'Product Code',
       width: '150px',
-      render: (item: Product) => <span className="font-mono text-xs text-gray-500">{item.id}</span>,
+      render: (item: Product) => <span className="font-mono text-xs text-gray-500">{item.product_code}</span>,
     },
     {
       key: 'name',
@@ -36,14 +43,7 @@ export function ProductTableView() {
       label: 'Category',
       width: '120px',
       render: (item: Product) => (
-        <Badge
-          className={cn(
-            'text-xs font-semibold',
-            item.category === 'Data' && 'bg-blue-100 text-blue-700',
-            item.category === 'Voice' && 'bg-amber-100 text-amber-700',
-            item.category === 'Combo' && 'bg-purple-100 text-purple-700'
-          )}
-        >
+        <Badge className={cn('text-xs font-semibold capitalize', categoryColors[item.category])}>
           {item.category}
         </Badge>
       ),
@@ -55,7 +55,7 @@ export function ProductTableView() {
       render: (item: Product) => (
         <div className="space-y-0.5">
           <p className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-base font-bold text-transparent">
-            Rp {item.price.toLocaleString('id-ID')}
+            Rp {Number(item.price).toLocaleString('id-ID')}
           </p>
           <p className="text-[10px] text-gray-400">per bulan</p>
         </div>
@@ -71,16 +71,16 @@ export function ProductTableView() {
       label: 'Action',
       width: '120px',
       align: 'right' as const,
-      render: (_item: Product) => (
+      render: (item: Product) => (
         <Button
           size="sm"
           className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
           onClick={e => {
             e.stopPropagation();
-            // Handle select action
+            router.push(`/products/${item.id}`);
           }}
         >
-          Pilih
+          Detail
         </Button>
       ),
     },

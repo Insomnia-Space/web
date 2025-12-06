@@ -34,16 +34,20 @@ function useChart() {
   return context;
 }
 
+// ✅ Fixed: Proper typing for ChartContainer props
+interface ChartContainerProps extends Omit<React.ComponentProps<'div'>, 'children'> {
+  id?: string;
+  config: ChartConfig;
+  children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>['children'];
+}
+
 function ChartContainer({
   id,
   className,
   children,
   config,
   ...props
-}: React.ComponentProps<'div'> & {
-  config: ChartConfig;
-  children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>['children'];
-}) {
+}: ChartContainerProps) {
   const uniqueId = React.useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, '')}`;
 
@@ -96,6 +100,36 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
+// ✅ Fixed: Proper typing for ChartTooltipContent props
+interface ChartTooltipContentProps extends Omit<React.ComponentProps<'div'>, 'content'> {
+  active?: boolean;
+  payload?: Array<{
+    dataKey?: string;
+    name?: string;
+    value?: number | string;
+    color?: string;
+    type?: string;
+    payload?: Record<string, unknown>;
+    fill?: string;
+  }>;
+  label?: string | number;
+  hideLabel?: boolean;
+  hideIndicator?: boolean;
+  indicator?: 'line' | 'dot' | 'dashed';
+  labelFormatter?: (value: unknown, payload: unknown[]) => React.ReactNode;
+  labelClassName?: string;
+  formatter?: (
+    value: number | string,
+    name: string,
+    item: unknown,
+    index: number,
+    payload: unknown
+  ) => React.ReactNode;
+  color?: string;
+  nameKey?: string;
+  labelKey?: string;
+}
+
 function ChartTooltipContent({
   active,
   payload,
@@ -110,14 +144,7 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-  React.ComponentProps<'div'> & {
-    hideLabel?: boolean;
-    hideIndicator?: boolean;
-    indicator?: 'line' | 'dot' | 'dashed';
-    nameKey?: string;
-    labelKey?: string;
-  }) {
+}: ChartTooltipContentProps) {
   const { config } = useChart();
 
   const tooltipLabel = React.useMemo(() => {
@@ -166,11 +193,11 @@ function ChartTooltipContent({
           .map((item, index) => {
             const key = `${nameKey || item.name || item.dataKey || 'value'}`;
             const itemConfig = getPayloadConfigFromPayload(config, item, key);
-            const indicatorColor = color || item.payload.fill || item.color;
+            const indicatorColor = color || item.payload?.fill || item.color;
 
             return (
               <div
-                key={item.dataKey}
+                key={`${item.dataKey}-${index}`}
                 className={cn(
                   '[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5',
                   indicator === 'dot' && 'items-center'
@@ -186,7 +213,7 @@ function ChartTooltipContent({
                       !hideIndicator && (
                         <div
                           className={cn(
-                            'shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg)',
+                            'shrink-0 rounded-[2px]',
                             {
                               'h-2.5 w-2.5': indicator === 'dot',
                               'w-1': indicator === 'line',
@@ -195,12 +222,10 @@ function ChartTooltipContent({
                               'my-0.5': nestLabel && indicator === 'dashed',
                             }
                           )}
-                          style={
-                            {
-                              '--color-bg': indicatorColor,
-                              '--color-border': indicatorColor,
-                            } as React.CSSProperties
-                          }
+                          style={{
+                            backgroundColor: typeof indicatorColor === 'string' ? indicatorColor : undefined,
+                            borderColor: typeof indicatorColor === 'string' ? indicatorColor : undefined,
+                          }}
                         />
                       )
                     )}
@@ -216,9 +241,9 @@ function ChartTooltipContent({
                           {itemConfig?.label || item.name}
                         </span>
                       </div>
-                      {item.value && (
+                      {item.value !== undefined && (
                         <span className="text-foreground font-mono font-medium tabular-nums">
-                          {item.value.toLocaleString()}
+                          {typeof item.value === 'number' ? item.value.toLocaleString() : item.value}
                         </span>
                       )}
                     </div>
@@ -234,17 +259,26 @@ function ChartTooltipContent({
 
 const ChartLegend = RechartsPrimitive.Legend;
 
+// ✅ Fixed: Proper typing for ChartLegendContent props
+interface ChartLegendContentProps extends React.ComponentProps<'div'> {
+  payload?: Array<{
+    value?: string;
+    type?: string;
+    dataKey?: string;
+    color?: string;
+  }>;
+  verticalAlign?: 'top' | 'bottom';
+  hideIcon?: boolean;
+  nameKey?: string;
+}
+
 function ChartLegendContent({
   className,
   hideIcon = false,
   payload,
   verticalAlign = 'bottom',
   nameKey,
-}: React.ComponentProps<'div'> &
-  Pick<RechartsPrimitive.LegendProps, 'payload' | 'verticalAlign'> & {
-    hideIcon?: boolean;
-    nameKey?: string;
-  }) {
+}: ChartLegendContentProps) {
   const { config } = useChart();
 
   if (!payload?.length) {
@@ -261,13 +295,13 @@ function ChartLegendContent({
     >
       {payload
         .filter(item => item.type !== 'none')
-        .map(item => {
+        .map((item, index) => {
           const key = `${nameKey || item.dataKey || 'value'}`;
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
 
           return (
             <div
-              key={item.value}
+              key={`${item.value}-${index}`}
               className={cn(
                 '[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3'
               )}
@@ -278,7 +312,7 @@ function ChartLegendContent({
                 <div
                   className="h-2 w-2 shrink-0 rounded-[2px]"
                   style={{
-                    backgroundColor: item.color,
+                    backgroundColor: item.color || undefined,
                   }}
                 />
               )}

@@ -1,48 +1,54 @@
 'use client';
 
-import { LayoutGrid, LayoutList, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Plus, Grid, List } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setViewMode } from '@/store/slices/productCatalogSlice';
+import { setViewMode } from '@/store/slices/productSlice';
 
-export function ProductListHeader() {
+interface ProductListHeaderProps {
+  onAddNew?: () => void;
+}
+
+export function ProductListHeader({ onAddNew }: ProductListHeaderProps) {
   const dispatch = useAppDispatch();
-  const { viewMode, filteredItems } = useAppSelector(state => state.product);
+  const { viewMode } = useAppSelector((state) => state.product);
 
   return (
-    <div className="rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-[2px]">
-      <div className="rounded-[10px] bg-white p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-purple-600" />
-              <h1 className="text-2xl font-bold tracking-tight text-gray-800">Product Catalog</h1>
-            </div>
-            <p className="mt-1 text-sm text-gray-600">
-              Jelajahi {filteredItems.length} produk telco terbaik kami
-            </p>
-          </div>
-          <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-1">
-            <Button
-              size="sm"
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              onClick={() => dispatch(setViewMode('grid'))}
-              className="gap-1.5 transition-all"
-            >
-              <LayoutGrid className="h-4 w-4" />
-              <span className="hidden sm:inline">Grid</span>
-            </Button>
-            <Button
-              size="sm"
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
-              onClick={() => dispatch(setViewMode('table'))}
-              className="gap-1.5 transition-all"
-            >
-              <LayoutList className="h-4 w-4" />
-              <span className="hidden sm:inline">Table</span>
-            </Button>
-          </div>
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold">Product Catalog</h1>
+        <p className="mt-1 text-muted-foreground">
+          Manage your telecom products and packages
+        </p>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="flex rounded-lg border border-gray-200 bg-white p-1">
+          <Button
+            variant={viewMode === 'grid' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => dispatch(setViewMode('grid'))}
+            className="gap-2"
+          >
+            <Grid className="h-4 w-4" />
+            Grid
+          </Button>
+          <Button
+            variant={viewMode === 'table' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => dispatch(setViewMode('table'))}
+            className="gap-2"
+          >
+            <List className="h-4 w-4" />
+            Table
+          </Button>
         </div>
+
+        {onAddNew && (
+          <Button onClick={onAddNew} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add New Product
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -1,16 +1,57 @@
+// app/(public)/maintenance/page.tsx
+
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils'; // Import cn
+
+// --- Kelas Glassmorphism & Utilitas ---
+
+// Kelas Glassmorphism untuk Card container
+const glassCardContainerClass = cn(
+  "w-full max-w-sm rounded-xl shadow-2xl backdrop-blur-md", 
+  "border border-white/30 bg-white/10 dark:border-gray-800/50 dark:bg-gray-900/10" // Glassmorphism Core
+);
+
+// Kelas Glassmorphism untuk Button Outline (Cek Ulang)
+const glassButtonOutlineClass = cn(
+  "h-10 w-full rounded-lg border-blue-400/50 text-base font-medium text-blue-500 shadow-md transition-all",
+  "bg-blue-600/10 hover:bg-blue-600/20 dark:border-blue-500/30 dark:bg-blue-900/10 dark:hover:bg-blue-900/20"
+);
+
+// Kelas Glassmorphism untuk Button Ghost (Hubungi Dukungan)
+const glassButtonGhostClass = cn(
+    "h-10 w-full rounded-lg text-sm transition-all",
+    "text-gray-600 hover:bg-white/20 dark:text-gray-300 dark:hover:bg-gray-700/50"
+);
+
+// Kelas untuk Info Estimasi Waktu (Glassy Accent)
+const glassTimeEstimateClass = cn(
+    "rounded-lg p-3",
+    "bg-blue-600/10 dark:bg-blue-900/10"
+);
+
+// Kelas Teks (untuk Dark Mode)
+const primaryTextClass = "text-gray-800 dark:text-white";
+const secondaryTextClass = "text-gray-500 dark:text-gray-400";
+const estimateTextClass = "text-gray-700 dark:text-gray-300";
+const accentColorClass = "text-blue-500 dark:text-blue-400";
+
+// ---------------------------------------------
 
 export default function MaintenancePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white p-4 font-sans antialiased">
-      <Card className="w-full max-w-sm rounded-xl border-none bg-white text-center shadow-sm">
+    // CONTAINER BACKGROUND: Memberikan latar belakang yang sedikit transparan untuk efek blur
+    <div className="flex min-h-screen items-center justify-center bg-gray-100/50 p-4 font-sans antialiased dark:bg-gray-900/50">
+      
+      {/* CARD CONTAINER: GLASSMORPHISM */}
+      <Card className={glassCardContainerClass}>
         <CardHeader className="p-8">
-          <div className="mx-auto mb-4 h-12 w-12 text-blue-400 opacity-70">
+          {/* SVG ICON: Menggunakan warna aksen Glassmorphism */}
+          <div className="mx-auto mb-4 h-12 w-12 opacity-80" aria-hidden="true">
             <svg
-              className="h-full w-full"
+              className={cn("h-full w-full", accentColorClass)}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -31,41 +72,44 @@ export default function MaintenancePage() {
             </svg>
           </div>
 
-          <CardTitle className="text-xl font-semibold tracking-tight text-gray-800">
+          <CardTitle className={cn("text-xl font-semibold tracking-tight", primaryTextClass)}>
             Pembaruan Sistem
           </CardTitle>
-          <CardDescription className="mt-1 text-sm text-gray-500">
+          <CardDescription className={cn("mt-1 text-sm", secondaryTextClass)}>
             Kami sedang melakukan pemeliharaan terencana.
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6 px-8 pb-8">
-          <div className="rounded-lg bg-blue-50 p-3">
-            <p className="text-xs font-medium text-gray-700">
-              <span className="font-semibold text-blue-500">Perkiraan Selesai:</span>{' '}
+          {/* ESTIMATE INFO: GLASSY BACKGROUND */}
+          <div className={glassTimeEstimateClass}>
+            <p className={cn("text-xs font-medium", estimateTextClass)}>
+              <span className={cn("font-semibold", accentColorClass)}>Perkiraan Selesai:</span>{' '}
               <span className="font-bold">~ 30 Menit</span>
             </p>
           </div>
 
           <div className="space-y-3 pt-2">
+            {/* BUTTON 1: CEK ULANG (GLASSMORPHISM OUTLINE) */}
             <Button
               variant="outline"
               onClick={() => window.location.reload()}
-              className="h-10 w-full rounded-lg border-blue-200 text-base font-medium text-blue-500 shadow-sm transition-all hover:bg-blue-50"
+              className={glassButtonOutlineClass}
             >
               Cek Ulang
             </Button>
 
+            {/* BUTTON 2: HUBUNGI DUKUNGAN (GLASSMORPHISM GHOST) */}
             <Button
               variant="ghost"
               asChild
-              className="h-10 w-full rounded-lg text-sm text-gray-500 transition-all hover:bg-gray-100"
+              className={glassButtonGhostClass}
             >
               <a href="mailto:support@telco-recommendation.com">Hubungi Tim Dukungan</a>
             </Button>
           </div>
 
-          <div className="mt-4 text-xs text-gray-400">
+          <div className={cn("mt-4 text-xs", secondaryTextClass)}>
             Kami menghargai kesabaran dan pengertian Anda.
           </div>
         </CardContent>

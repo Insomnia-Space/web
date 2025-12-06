@@ -1,290 +1,196 @@
-// store/slices/productSlice.ts
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { RootState } from '../index';
-
-export interface ProductPerformance {
-  id: number;
-  productName: string;
-  timesRecommended: number;
-  avgConfidenceScore: number;
-  acceptanceRate: number;
-}
-
-interface ProductFilters {
-  searchTerm: string;
-  minAcceptanceRate: number | null;
-  minConfidenceScore: number | null;
-}
-
-interface ProductStats {
-  totalProducts: number;
-  totalRecommendations: number;
-  avgConfidence: number;
-  avgAcceptance: number;
-}
-
-interface ProductPagination {
-  currentPage: number;
-  itemsPerPage: number;
-  totalItems: number;
-  totalPages: number;
-}
-
-interface ProductState {
-  products: ProductPerformance[];
-  filteredProducts: ProductPerformance[];
-  filters: ProductFilters;
-  sortField: 'timesRecommended' | 'avgConfidenceScore' | 'acceptanceRate' | null;
-  sortOrder: 'asc' | 'desc' | null;
-  pagination: ProductPagination;
-  loading: boolean;
-  error: string | null;
-  stats: ProductStats;
-}
-
-// Mock data
-const mockProducts: ProductPerformance[] = [
-  {
-    id: 1,
-    productName: 'Paket Internet Unlimited 50GB',
-    timesRecommended: 245,
-    avgConfidenceScore: 0.92,
-    acceptanceRate: 89.5,
-  },
-  {
-    id: 2,
-    productName: 'Paket Voice & SMS Premium',
-    timesRecommended: 189,
-    avgConfidenceScore: 0.88,
-    acceptanceRate: 85.2,
-  },
-  {
-    id: 3,
-    productName: 'Paket Streaming HD',
-    timesRecommended: 167,
-    avgConfidenceScore: 0.85,
-    acceptanceRate: 82.7,
-  },
-  {
-    id: 4,
-    productName: 'Paket Family 100GB',
-    timesRecommended: 156,
-    avgConfidenceScore: 0.91,
-    acceptanceRate: 91.3,
-  },
-  {
-    id: 5,
-    productName: 'Paket Gaming Low Latency',
-    timesRecommended: 143,
-    avgConfidenceScore: 0.87,
-    acceptanceRate: 86.8,
-  },
-  {
-    id: 6,
-    productName: 'Paket Business 200GB',
-    timesRecommended: 128,
-    avgConfidenceScore: 0.94,
-    acceptanceRate: 93.1,
-  },
-  {
-    id: 7,
-    productName: 'Paket Social Media',
-    timesRecommended: 112,
-    avgConfidenceScore: 0.83,
-    acceptanceRate: 80.4,
-  },
-  {
-    id: 8,
-    productName: 'Paket Roaming International',
-    timesRecommended: 98,
-    avgConfidenceScore: 0.89,
-    acceptanceRate: 87.9,
-  },
-];
-
-const calculateStats = (products: ProductPerformance[]): ProductStats => {
-  const totalProducts = products.length;
-  const totalRecommendations = products.reduce((sum, p) => sum + p.timesRecommended, 0);
-  const avgConfidence =
-    totalProducts > 0
-      ? (products.reduce((sum, p) => sum + p.avgConfidenceScore, 0) / totalProducts) * 100
-      : 0;
-  const avgAcceptance =
-    totalProducts > 0 ? products.reduce((sum, p) => sum + p.acceptanceRate, 0) / totalProducts : 0;
-
-  return {
-    totalProducts,
-    totalRecommendations,
-    avgConfidence,
-    avgAcceptance,
-  };
-};
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type { RootState } from '../index';
+import type { Product, ProductState } from '@/types/product-types';
+import { ProductService } from '@/services/product.service';
 
 const initialState: ProductState = {
-  products: mockProducts,
-  filteredProducts: mockProducts,
+  items: [],
+  categories: [],
+  filteredItems: [],
   filters: {
     searchTerm: '',
-    minAcceptanceRate: null,
-    minConfidenceScore: null,
+    category: 'All',
   },
-  sortField: null,
-  sortOrder: null,
   pagination: {
     currentPage: 1,
-    itemsPerPage: 10,
-    totalItems: mockProducts.length,
-    totalPages: Math.ceil(mockProducts.length / 10),
+    itemsPerPage: 12,
+    totalItems: 0,
+    totalPages: 0,
   },
+  selectedItem: null,
   loading: false,
   error: null,
-  stats: calculateStats(mockProducts),
+  stats: {
+    total: 0,
+    data: 0,
+    voice: 0,
+    combo: 0,
+    addon: 0,
+  },
+  viewMode: 'grid',
 };
 
-const applyFiltersAndSort = (state: ProductState) => {
-  let filtered = [...state.products];
+// Async Thunks
+export const fetchProducts = createAsyncThunk(
+  'products/fetchAll',
+  async (params: { page?: number; limit?: number } | undefined, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as RootState;
+      const { filters, pagination } = state.product;
 
-  // Apply search filter
-  if (state.filters.searchTerm) {
-    const searchLower = state.filters.searchTerm.toLowerCase();
-    filtered = filtered.filter(product => product.productName.toLowerCase().includes(searchLower));
+      // Fix: Don't send category if it's 'All'
+      const categoryParam = filters.category !== 'All' ? filters.category : undefined;
+
+      const response = await ProductService.getAll({
+        page: params?.page || pagination.currentPage,
+        limit: params?.limit || pagination.itemsPerPage,
+        search: filters.searchTerm || undefined,
+        category: categoryParam,
+        min_price: filters.minPrice,
+        max_price: filters.maxPrice,
+      });
+
+      return response;
+    } catch (error) {
+      // ✅ Fixed: Removed 'any' type and console.error
+      const message = error instanceof Error ? error.message : 'Failed to fetch products';
+      return rejectWithValue(message);
+    }
   }
+);
 
-  // Apply acceptance rate filter
-  if (state.filters.minAcceptanceRate !== null) {
-    filtered = filtered.filter(
-      product => product.acceptanceRate >= state.filters.minAcceptanceRate!
-    );
+export const fetchCategories = createAsyncThunk(
+  'products/fetchCategories',
+  async (_, { rejectWithValue }) => {
+    try {
+      const categories = await ProductService.getCategories();
+      return categories;
+    } catch (error) {
+      // ✅ Fixed: Removed 'any' type
+      const message = error instanceof Error ? error.message : 'Failed to fetch categories';
+      return rejectWithValue(message);
+    }
   }
-
-  // Apply confidence score filter
-  if (state.filters.minConfidenceScore !== null) {
-    filtered = filtered.filter(
-      product => product.avgConfidenceScore * 100 >= state.filters.minConfidenceScore!
-    );
-  }
-
-  // Apply sorting
-  if (state.sortField && state.sortOrder) {
-    filtered.sort((a, b) => {
-      const aValue = a[state.sortField!];
-      const bValue = b[state.sortField!];
-      return state.sortOrder === 'asc' ? (aValue > bValue ? 1 : -1) : aValue < bValue ? 1 : -1;
-    });
-  }
-
-  state.filteredProducts = filtered;
-  state.stats = calculateStats(filtered);
-
-  // Update pagination
-  state.pagination.totalItems = filtered.length;
-  state.pagination.totalPages = Math.ceil(filtered.length / state.pagination.itemsPerPage);
-
-  // Reset to page 1 if current page exceeds total pages
-  if (
-    state.pagination.currentPage > state.pagination.totalPages &&
-    state.pagination.totalPages > 0
-  ) {
-    state.pagination.currentPage = 1;
-  }
-};
+);
 
 const productSlice = createSlice({
-  name: 'products',
+  name: 'product',
   initialState,
   reducers: {
     setSearchTerm: (state, action: PayloadAction<string>) => {
       state.filters.searchTerm = action.payload;
-      applyFiltersAndSort(state);
-    },
-    setMinAcceptanceRate: (state, action: PayloadAction<number | null>) => {
-      state.filters.minAcceptanceRate = action.payload;
-      applyFiltersAndSort(state);
-    },
-    setMinConfidenceScore: (state, action: PayloadAction<number | null>) => {
-      state.filters.minConfidenceScore = action.payload;
-      applyFiltersAndSort(state);
-    },
-    setSorting: (
-      state,
-      action: PayloadAction<{
-        field: 'timesRecommended' | 'avgConfidenceScore' | 'acceptanceRate';
-      }>
-    ) => {
-      const { field } = action.payload;
-
-      if (state.sortField === field) {
-        // Toggle sort order
-        if (state.sortOrder === 'desc') {
-          state.sortOrder = 'asc';
-        } else if (state.sortOrder === 'asc') {
-          state.sortOrder = null;
-          state.sortField = null;
-        } else {
-          state.sortOrder = 'desc';
-        }
-      } else {
-        state.sortField = field;
-        state.sortOrder = 'desc';
-      }
-
-      applyFiltersAndSort(state);
-    },
-    clearFilters: state => {
-      state.filters = {
-        searchTerm: '',
-        minAcceptanceRate: null,
-        minConfidenceScore: null,
-      };
-      state.sortField = null;
-      state.sortOrder = null;
       state.pagination.currentPage = 1;
-      applyFiltersAndSort(state);
+    },
+    setCategoryFilter: (state, action: PayloadAction<ProductState['filters']['category']>) => {
+      state.filters.category = action.payload;
+      state.pagination.currentPage = 1;
+    },
+    setPriceRange: (state, action: PayloadAction<{ min?: number; max?: number }>) => {
+      state.filters.minPrice = action.payload.min;
+      state.filters.maxPrice = action.payload.max;
+      state.pagination.currentPage = 1;
     },
     setPage: (state, action: PayloadAction<number>) => {
       state.pagination.currentPage = action.payload;
     },
-    setItemsPerPage: (state, action: PayloadAction<number>) => {
-      state.pagination.itemsPerPage = action.payload;
-      state.pagination.currentPage = 1;
-      state.pagination.totalPages = Math.ceil(state.filteredProducts.length / action.payload);
+    setViewMode: (state, action: PayloadAction<'grid' | 'table'>) => {
+      state.viewMode = action.payload;
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
-    setError: (state, action: PayloadAction<string | null>) => {
-      state.error = action.payload;
+    resetFilters: (state) => {
+      state.filters = initialState.filters;
+      state.pagination.currentPage = 1;
     },
+    setSelectedItem: (state, action: PayloadAction<Product | null>) => {
+      state.selectedItem = action.payload;
+    },
+    addProduct: (state, action: PayloadAction<Product>) => {
+      state.items.unshift(action.payload);
+      state.stats.total += 1;
+      state.stats[action.payload.category] += 1;
+    },
+    updateProduct: (state, action: PayloadAction<Product>) => {
+      const index = state.items.findIndex((p) => p.id === action.payload.id);
+      if (index !== -1) {
+        state.items[index] = action.payload;
+      }
+    },
+    deleteProduct: (state, action: PayloadAction<string>) => {
+      const product = state.items.find((p) => p.id === action.payload);
+      if (product) {
+        state.items = state.items.filter((p) => p.id !== action.payload);
+        state.stats.total -= 1;
+        state.stats[product.category] -= 1;
+      }
+    },
+  },
+  extraReducers: (builder) => {
+    // Fetch Products
+    builder
+      .addCase(fetchProducts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload.products;
+        state.filteredItems = action.payload.products;
+        
+        if (action.payload.pagination) {
+          state.pagination.totalItems = action.payload.pagination.total;
+          state.pagination.totalPages = action.payload.pagination.total_pages;
+          state.pagination.currentPage = action.payload.pagination.current_page;
+          state.pagination.itemsPerPage = action.payload.pagination.per_page;
+        }
+
+        state.stats.total = action.payload.pagination?.total || action.payload.products.length;
+        state.stats.data = action.payload.products.filter((p) => p.category === 'data').length;
+        state.stats.voice = action.payload.products.filter((p) => p.category === 'voice').length;
+        state.stats.combo = action.payload.products.filter((p) => p.category === 'combo').length;
+        state.stats.addon = action.payload.products.filter((p) => p.category === 'addon').length;
+      })
+      .addCase(fetchProducts.rejected, (state, action) => {
+        // ✅ Fixed: Removed console.error
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
+export const selectPaginatedItems = (state: RootState) => {
+  const { items, filteredItems } = state.product;
+  
+  // Return items directly since backend handles pagination
+  // Use filteredItems if available, otherwise use items
+  const result = filteredItems.length > 0 ? filteredItems : items;  
+  
+  return result;
+};
+
+export const selectPageInfo = (state: RootState) => {
+  const { pagination } = state.product;
+  return {
+    currentPage: pagination.currentPage,
+    totalPages: pagination.totalPages,
+    totalItems: pagination.totalItems,
+    itemsPerPage: pagination.itemsPerPage,
+  };
+};
+
 export const {
   setSearchTerm,
-  setMinAcceptanceRate,
-  setMinConfidenceScore,
-  setSorting,
-  clearFilters,
+  setCategoryFilter,
+  setPriceRange,
   setPage,
-  setItemsPerPage,
+  setViewMode,
   setLoading,
-  setError,
+  resetFilters,
+  setSelectedItem,
+  addProduct,
+  updateProduct,
+  deleteProduct,
 } = productSlice.actions;
-
-// Selectors
-export const selectAllProducts = (state: RootState) => state.products.filteredProducts;
-export const selectPaginatedProducts = (state: RootState) => {
-  const { filteredProducts, pagination } = state.products;
-  const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
-  const endIndex = startIndex + pagination.itemsPerPage;
-  return filteredProducts.slice(startIndex, endIndex);
-};
-export const selectProductStats = (state: RootState) => state.products.stats;
-export const selectProductFilters = (state: RootState) => state.products.filters;
-export const selectProductSorting = (state: RootState) => ({
-  sortField: state.products.sortField,
-  sortOrder: state.products.sortOrder,
-});
-export const selectProductPagination = (state: RootState) => state.products.pagination;
-export const selectProductLoading = (state: RootState) => state.products.loading;
 
 export default productSlice.reducer;

@@ -5,12 +5,15 @@ import { ErrorBoundary } from '../ErrorBoundary';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import LoadingPage from '@/app/loading';
+import { useTokenRefresh } from '@/hooks/use-token-refresh';
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
+  useTokenRefresh();
+
   return (
     <div className="bg-background min-h-screen">
       <Header />

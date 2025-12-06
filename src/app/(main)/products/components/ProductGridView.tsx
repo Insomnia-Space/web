@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAppSelector } from '@/store/hooks';
-import { selectPaginatedItems } from '@/store/slices/productCatalogSlice';
+import { selectPaginatedItems } from '@/store/slices/productSlice';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 
@@ -11,9 +11,12 @@ export function ProductGridView() {
   const router = useRouter();
   const items = useAppSelector(selectPaginatedItems);
 
-  if (items.length === 0) {
-    return null;
-  }
+  const categoryColors = {
+    data: 'bg-blue-100 text-blue-700 group-hover:bg-blue-200',
+    voice: 'bg-amber-100 text-amber-700 group-hover:bg-amber-200',
+    combo: 'bg-purple-100 text-purple-700 group-hover:bg-purple-200',
+    addon: 'bg-green-100 text-green-700 group-hover:bg-green-200',
+  };
 
   return (
     <div className="animate-in fade-in grid grid-cols-1 gap-4 duration-300 md:grid-cols-2 lg:grid-cols-3">
@@ -24,25 +27,19 @@ export function ProductGridView() {
           style={{ animationDelay: `${idx * 50}ms` }}
           onClick={() => router.push(`/products/${product.id}`)}
         >
-          {/* Gradient overlay on hover */}
           <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-500/0 via-pink-500/0 to-blue-500/0 opacity-0 transition-opacity group-hover:opacity-10" />
 
           <div className="relative space-y-3">
             <div className="flex items-start justify-between">
               <Badge
                 className={cn(
-                  'text-[11px] font-semibold transition-all group-hover:scale-110',
-                  product.category === 'Data' &&
-                    'bg-blue-100 text-blue-700 group-hover:bg-blue-200',
-                  product.category === 'Voice' &&
-                    'bg-amber-100 text-amber-700 group-hover:bg-amber-200',
-                  product.category === 'Combo' &&
-                    'bg-purple-100 text-purple-700 group-hover:bg-purple-200'
+                  'text-[11px] font-semibold capitalize transition-all group-hover:scale-110',
+                  categoryColors[product.category]
                 )}
               >
                 {product.category}
               </Badge>
-              <span className="font-mono text-[10px] text-gray-400">{product.id}</span>
+              <span className="font-mono text-[10px] text-gray-400">{product.product_code}</span>
             </div>
 
             <div>
@@ -58,7 +55,7 @@ export function ProductGridView() {
               <div>
                 <p className="text-[10px] font-medium text-gray-500">Harga</p>
                 <p className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent">
-                  Rp {product.price.toLocaleString('id-ID')}
+                  Rp {Number(product.price).toLocaleString('id-ID')}
                 </p>
               </div>
               <Button
@@ -66,10 +63,10 @@ export function ProductGridView() {
                 className="bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 transition-all group-hover:opacity-100 hover:from-purple-700 hover:to-pink-700"
                 onClick={e => {
                   e.stopPropagation();
-                  // Handle select action
+                  router.push(`/products/${product.id}`);
                 }}
               >
-                Pilih
+                Detail
               </Button>
             </div>
           </div>

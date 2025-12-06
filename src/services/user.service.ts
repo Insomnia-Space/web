@@ -1,23 +1,50 @@
-import type { User, CreateUserDto, UpdateUserDto } from '@/types/user-types';
+import apiClient from '@/lib/api-client';
+import type { CreateUserDto, UpdateUserDto, User, UserDetail } from '@/types/user-types';
 
-interface FetchUsersResponse {
+interface ApiResponse<T = unknown> {
   success: boolean;
-  data?: {
-    users: User[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
+  message: string;
+  data?: T;
+  meta: {
+    timestamp: string;
+    version: string;
   };
-  error?: string;
+  pagination?: {
+    total: number;
+    count: number;
+    per_page: number;
+    current_page: number;
+    total_pages: number;
+    offset: number;
+  };
 }
 
-interface ApiResponse {
-  success: boolean;
-  data?: any;
-  error?: string;
+interface UserListResponse {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: 'admin' | 'staff';
+  status: 'active' | 'inactive';
+  last_login: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface UserDetailResponse {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'staff';
+  status: 'active' | 'inactive';
+  last_login: string | null;
+  statistics: {
+    total_recommendations_generated: number;
+    total_overrides: number;
+    avg_confidence_score: number;
+  };
+  created_at: string;
+  updated_at: string;
 }
 
 export const UserService = {
@@ -27,80 +54,147 @@ export const UserService = {
     if (params?.limit) queryParams.set('limit', params.limit.toString());
     if (params?.search) queryParams.set('search', params.search);
 
-    const response = await fetch(`/api/users?${queryParams.toString()}`);
-    if (!response.ok) throw new Error('Failed to fetch users');
-    
-    const json: FetchUsersResponse = await response.json();
-    if (!json.success || !json.data) {
-      throw new Error(json.error || 'Failed to fetch users');
+    const response = await apiClient.get<ApiResponse<UserListResponse[]>>(
+      `/api/v1/feature/users?${queryParams.toString()}`
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.message || 'Failed to fetch users');
     }
-    
-    // Enrich with status since API doesn't provide it yet
-    const enriched = json.data.users.map((u) => ({
-      ...u,
-      status: (u.status || 'active') as 'active' | 'inactive',
+
+    // Transform API response to match User type
+    const users: User[] = response.data.data.map(user => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role === 'admin' ? 'admin' : 'user',
+      status: user.status,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at,
     }));
-    
-    return enriched;
+
+    return users;
   },
 
   getById: async (id: string) => {
-    const response = await fetch(`/api/users/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch user');
-    
-    const json: ApiResponse = await response.json();
-    if (!json.success || !json.data) {
-      throw new Error(json.error || 'Failed to fetch user');
+    const response = await apiClient.get<ApiResponse<UserDetailResponse>>(
+      `/api/v1/feature/users/${id}`
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.message || 'Failed to fetch user');
     }
-    
-    return json.data as User;
+
+    const userData = response.data.data;
+
+    // Transform to UserDetail type
+    const userDetail: UserDetail = {
+      id: userData.id,
+      name: userData.name,
+      email: userData.email,
+      role: userData.role === 'admin' ? 'admin' : 'user',
+      status: userData.status,
+      lastLogin: userData.last_login || undefined,
+      createdAt: userData.created_at,
+      updatedAt: userData.updated_at,
+      department: 'Engineering', // Mock data
+      phone: '+62 812 3456 7890', // Mock data
+    };
+
+    return userDetail;
   },
 
   create: async (data: CreateUserDto) => {
-    const response = await fetch('/api/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    
-    const json: ApiResponse = await response.json();
-    if (!json.success) {
-      throw new Error(json.error || 'Failed to create user');
+    const response = await apiClient.post<ApiResponse<UserListResponse>>(
+      '/api/v1/feature/users',
+      {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role: data.role === 'admin' ? 'admin' : 'staff',
+      }
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.message || 'Failed to create user');
     }
-    
-    return json.data as User;
+
+    const userData = response.data.data;
+
+    const user: User = {
+      id: userData.id,
+      name: userData.name,
+      email: userData.email,
+      role: userData.role === 'admin' ? 'admin' : 'user',
+      status: userData.status,
+      createdAt: userData.created_at,
+      updatedAt: userData.updated_at,
+    };
+
+    return user;
   },
 
   update: async (id: string, data: UpdateUserDto) => {
-    const response = await fetch(`/api/users/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    
-    const json: ApiResponse = await response.json();
-    if (!json.success) {
-      throw new Error(json.error || 'Failed to update user');
+    const response = await apiClient.put<ApiResponse<UserListResponse>>(
+      `/api/v1/feature/users/${id}`,
+      data
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.message || 'Failed to update user');
     }
-    
-    return json.data as User;
+
+    const userData = response.data.data;
+
+    const user: User = {
+      id: userData.id,
+      name: userData.name,
+      email: userData.email,
+      role: userData.role === 'admin' ? 'admin' : 'user',
+      status: userData.status,
+      createdAt: userData.created_at,
+      updatedAt: userData.updated_at,
+    };
+
+    return user;
   },
 
   delete: async (id: string) => {
-    const response = await fetch(`/api/users/${id}`, {
-      method: 'DELETE',
-    });
-    
-    const json: ApiResponse = await response.json();
-    if (!json.success) {
-      throw new Error(json.error || 'Failed to delete user');
+    const response = await apiClient.delete<ApiResponse>(
+      `/api/v1/feature/users/${id}`
+    );
+
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Failed to delete user');
     }
-    
-    return json.data;
+
+    return response.data.data;
   },
 
   toggleStatus: async (id: string, currentStatus: 'active' | 'inactive') => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-    return UserService.update(id, { status: newStatus });
+    
+    const response = await apiClient.patch<ApiResponse<UserListResponse>>(
+      `/api/v1/feature/users/${id}/status`,
+      { status: newStatus }
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.message || 'Failed to update status');
+    }
+
+    const userData = response.data.data;
+
+    const user: User = {
+      id: userData.id,
+      name: userData.name,
+      email: userData.email,
+      role: userData.role === 'admin' ? 'admin' : 'user',
+      status: userData.status,
+      createdAt: userData.created_at,
+      updatedAt: userData.updated_at,
+    };
+
+    return user;
   },
 };

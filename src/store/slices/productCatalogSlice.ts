@@ -1,11 +1,10 @@
-// store/slices/productSlice.ts
-
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import type { RootState } from '../index';
 import type { Product, ProductDetail, ProductState, ProductStats } from '@/types/product-types';
 
 const initialState: ProductState = {
   items: [],
+  categories: [],
   filteredItems: [],
   filters: {
     searchTerm: '',
@@ -26,6 +25,7 @@ const initialState: ProductState = {
     data: 0,
     voice: 0,
     combo: 0,
+    addon: 0, // ✅ Added addon
   },
 };
 
@@ -89,21 +89,24 @@ const productSlice = createSlice({
   },
 });
 
+// ✅ Fixed: Apply filters with proper type checking
 function applyFilters(state: ProductState) {
   let filtered = state.items;
 
+  // Search filter
   if (state.filters.searchTerm) {
     const search = state.filters.searchTerm.toLowerCase();
     filtered = filtered.filter(
       item =>
-        item.id.toLowerCase().includes(search) ||
+        item.product_code.toLowerCase().includes(search) ||
         item.name.toLowerCase().includes(search) ||
         item.description.toLowerCase().includes(search)
     );
   }
 
+  // Category filter
   if (state.filters.category !== 'All') {
-    filtered = filtered.filter(item => item.category === state.filters.category);
+    filtered = filtered.filter(item => item.category === state.filters.category.toLowerCase() as Product['category']);
   }
 
   state.filteredItems = filtered;
@@ -111,15 +114,18 @@ function applyFilters(state: ProductState) {
   state.pagination.totalPages = Math.ceil(filtered.length / state.pagination.itemsPerPage);
 }
 
+// ✅ Fixed: Calculate stats with proper lowercase categories
 function calculateStats(items: Product[]): ProductStats {
   return {
     total: items.length,
-    data: items.filter(item => item.category === 'Data').length,
-    voice: items.filter(item => item.category === 'Voice').length,
-    combo: items.filter(item => item.category === 'Combo').length,
+    data: items.filter(item => item.category === 'data').length,
+    voice: items.filter(item => item.category === 'voice').length,
+    combo: items.filter(item => item.category === 'combo').length,
+    addon: items.filter(item => item.category === 'addon').length, // ✅ Added addon
   };
 }
 
+// Selectors
 export const selectPaginatedItems = (state: RootState) => {
   const { filteredItems, pagination } = state.product;
   const start = (pagination.currentPage - 1) * pagination.itemsPerPage;

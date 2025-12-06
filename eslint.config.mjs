@@ -30,9 +30,6 @@ const eslintConfig = [
       'no-debugger': 'error',
       'prefer-const': 'error',
       'no-var': 'error',
-
-      // Import rules
-      'sort-imports': ['error', { ignoreDeclarationSort: true }],
     },
   },
   {

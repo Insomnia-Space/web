@@ -1,38 +1,33 @@
 'use client';
 
 import { useAppSelector } from '@/store/hooks';
+import { selectPaginatedItems } from '@/store/slices/productSlice';
 import { ProductGridView } from './ProductGridView';
 import { ProductTableView } from './ProductTableView';
-import EmptyState from '@/components/empty-state';
-import SkeletonLoader from '@/components/skeleton-loader';
-import { Search } from 'lucide-react';
+import { LoadingSpinner } from '@/components/loading-spinner';
 
 export function ProductContent() {
-  const { viewMode, loading, filteredItems } = useAppSelector(state => state.product);
+  const { viewMode, loading } = useAppSelector(state => state.product);
+  const items = useAppSelector(selectPaginatedItems);
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        {viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
-              <SkeletonLoader key={i} type="card" />
-            ))}
-          </div>
-        ) : (
-          <SkeletonLoader type="table" rows={5} />
-        )}
+      <div className="flex min-h-[400px] items-center justify-center">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
-  if (filteredItems.length === 0) {
+  if (items.length === 0) {
     return (
-      <EmptyState
-        icon={<Search className="h-10 w-10" />}
-        title="Tidak ada produk yang cocok"
-        message="Coba ubah filter atau kata kunci pencarian"
-      />
+      <div className="flex min-h-[400px] items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-gray-900">No Products Found</h3>
+          <p className="mt-2 text-sm text-gray-500">
+            Try adjusting your filters or create a new product
+          </p>
+        </div>
+      </div>
     );
   }
 

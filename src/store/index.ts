@@ -3,23 +3,26 @@ import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 import authSlice from './slices/authSlice';
 import customerReducer from './slices/customerSlice';
-import productSlice from './slices/productSlice';
-import productReducer from './slices/productCatalogSlice';
+import productReducer from './slices/productSlice';
+import dashboardReducer from './slices/dashboardSlice'; 
 import userReducer from './slices/userSlice';
+import profileReducer from './slices/profileSlice';
+import recommendationReducer from './slices/recommendationSlice';
 
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth'], // Only persist auth slice
+  whitelist: ['auth'],
 };
 
 const rootReducer = combineReducers({
   auth: authSlice,
   customers: customerReducer,
-  products: productSlice,
   product: productReducer,
+  dashboard: dashboardReducer, 
   user: userReducer,
-  // user: userSlice,
+  profile: profileReducer,
+  recommendation: recommendationReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

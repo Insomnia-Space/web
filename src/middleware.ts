@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 
 // Define public routes that don't require authentication
 const publicRoutes = [
-  '/',
   '/auth/signin',
   '/auth/signup',
   '/auth/error',
@@ -21,6 +20,11 @@ const adminRoutes = ['/admin'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Redirect root path to sign in
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/auth/signin', request.url));
+  }
 
   // Check for maintenance mode (you can set this via environment variable)
   if (process.env.MAINTENANCE_MODE === 'true' && pathname !== '/maintenance') {
@@ -63,6 +67,7 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Middleware error:', error);
     // On error, redirect to error page
     return NextResponse.redirect(new URL('/auth/error', request.url));

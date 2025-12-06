@@ -1,66 +1,126 @@
+// app/(public)/not-found/page.tsx
+
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import { Search } from 'lucide-react';
+import { cn } from '@/lib/utils'; // Import cn
+
+// --- Kelas Glassmorphism & Utilitas ---
+
+// Kelas Glassmorphism untuk Card container
+const glassCardContainerClass = cn(
+  "w-full max-w-sm rounded-xl shadow-2xl backdrop-blur-md", 
+  "border border-white/30 bg-white/10 dark:border-gray-800/50 dark:bg-gray-900/10" // Glassmorphism Core
+);
+
+// Kelas Glassmorphism untuk Button Outline (Cek Ulang)
+const glassButtonOutlineClass = cn(
+  "h-10 w-full rounded-lg border-blue-400/50 text-base font-medium text-blue-500 shadow-md transition-all",
+  "bg-blue-600/10 hover:bg-blue-600/20 dark:border-blue-500/30 dark:bg-blue-900/10 dark:hover:bg-blue-900/20"
+);
+
+// Kelas Glassmorphism untuk Button Ghost (Kembali ke Beranda)
+const glassButtonGhostClass = cn(
+    "h-10 w-full rounded-lg text-sm transition-all",
+    "text-gray-600 hover:bg-white/20 dark:text-gray-300 dark:hover:bg-gray-700/50"
+);
+
+// Kelas untuk Link Bantuan (Glassy Accent)
+const glassHelpBoxClass = cn(
+    "rounded-lg p-3 text-left border border-white/20",
+    "bg-blue-600/10 dark:bg-blue-900/10 dark:border-gray-700/50"
+);
+
+// Kelas Teks (untuk Dark Mode)
+const primaryTextClass = "text-gray-800 dark:text-white";
+const secondaryTextClass = "text-gray-500 dark:text-gray-400";
+const helpTextClass = "text-gray-700 dark:text-gray-300";
+const accentColorClass = "text-blue-500 dark:text-blue-400";
+
+// ---------------------------------------------
 
 export default function NotFoundPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md text-center">
-        <CardHeader>
-          <div className="mx-auto mb-4 h-24 w-24 text-blue-500">
-            <svg
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
+    // CONTAINER BACKGROUND: Memberikan latar belakang yang sedikit transparan untuk efek blur
+    <div className="flex min-h-screen items-center justify-center bg-gray-100/50 p-4 font-sans antialiased dark:bg-gray-900/50">
+      
+      {/* CARD CONTAINER: GLASSMORPHISM */}
+      <Card className={glassCardContainerClass}>
+        <CardHeader className="p-8">
+          {/* ICON: Menggunakan warna aksen Glassmorphism */}
+          <div className="mx-auto mb-4 h-12 w-12 opacity-80">
+            <Search className={cn("h-full w-full", accentColorClass)} />
           </div>
-          <CardTitle className="mb-2 text-4xl font-bold text-gray-900">404</CardTitle>
-          <CardTitle className="text-xl font-semibold text-gray-700">Page Not Found</CardTitle>
-          <CardDescription className="text-gray-600">
-            Sorry, we couldn't find the page you're looking for. The page might have been moved,
-            deleted, or you entered the wrong URL.
+
+          <CardTitle className={cn("text-2xl font-semibold tracking-tight", primaryTextClass)}>
+            404 — Halaman Tidak Ditemukan
+          </CardTitle>
+          <CardDescription className={cn("mt-1 text-sm", secondaryTextClass)}>
+            Maaf, halaman yang Anda cari tidak ditemukan. Coba periksa kembali URL atau kembali ke
+            beranda.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Button asChild className="w-full">
-              <Link href="/">Go to Homepage</Link>
+
+        <CardContent className="space-y-6 px-8 pb-8">
+          <div className="space-y-3 pt-2">
+            {/* BUTTON 1: CEK ULANG (GLASSMORPHISM OUTLINE) */}
+            <Button
+              variant="outline"
+              onClick={() => window.location.reload()}
+              className={glassButtonOutlineClass}
+            >
+              Cek Ulang
             </Button>
-            <Button variant="outline" asChild className="w-full">
-              <Link href="/dashboard">Go to Dashboard</Link>
+
+            {/* BUTTON 2: KEMBALI KE BERANDA (GLASSMORPHISM GHOST) */}
+            <Button
+              variant="ghost"
+              asChild
+              className={glassButtonGhostClass}
+            >
+              <Link href="/">Kembali ke Beranda</Link>
             </Button>
           </div>
 
-          <div className="border-t pt-4">
-            <p className="mb-2 text-sm text-gray-500">Popular pages:</p>
-            <div className="space-y-1">
+          {/* HELP/LINK BOX: GLASSY BACKGROUND */}
+          <div className={glassHelpBoxClass}>
+            <p className={cn("text-xs font-medium", helpTextClass)}>
+              Berikut beberapa halaman yang mungkin membantu:
+            </p>
+            <div className="mt-2 space-y-1">
               <Link
                 href="/auth/signin"
-                className="block text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                className={cn("block text-sm hover:underline", accentColorClass)}
               >
-                Sign In
+                Masuk
               </Link>
               <Link
                 href="/recommendations"
-                className="block text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                className={cn("block text-sm hover:underline", accentColorClass)}
               >
-                Recommendations
+                Rekomendasi
               </Link>
               <Link
                 href="/dashboard"
-                className="block text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                className={cn("block text-sm hover:underline", accentColorClass)}
               >
                 Dashboard
               </Link>
             </div>
+          </div>
+
+          <div className={cn("mt-4 text-xs", secondaryTextClass)}>
+            Jika masalah berlanjut,{' '}
+            <a
+              className={cn(accentColorClass, "hover:underline")}
+              href="mailto:support@telco-recommendation.com"
+            >
+              hubungi tim dukungan
+            </a>
+            .
           </div>
         </CardContent>
       </Card>

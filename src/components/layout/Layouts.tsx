@@ -3,17 +3,24 @@
 import React from 'react';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { Header } from './Header';
+import { Sidebar } from './Sidebar';
+import LoadingPage from '@/app/loading';
+import { useTokenRefresh } from '@/hooks/use-token-refresh';
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
+  useTokenRefresh();
+
   return (
     <div className="bg-background min-h-screen">
       <Header />
       <main className="container mx-auto px-4 py-6">
-        <ErrorBoundary>{children}</ErrorBoundary>
+        <ErrorBoundary>
+          <React.Suspense fallback={<LoadingPage />}>{children}</React.Suspense>
+        </ErrorBoundary>
       </main>
     </div>
   );
@@ -21,21 +28,31 @@ export function MainLayout({ children }: MainLayoutProps) {
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  sidebar?: React.ReactNode;
+  showSidebar?: boolean;
 }
 
-export function DashboardLayout({ children, sidebar }: DashboardLayoutProps) {
+export function DashboardLayout({ children, showSidebar = true }: DashboardLayoutProps) {
   return (
-    <div className="bg-background min-h-screen">
-      <Header />
-      <div className="flex">
-        {sidebar && (
-          <aside className="min-h-[calc(100vh-3.5rem)] w-64 border-r bg-gray-50 p-4">
-            {sidebar}
-          </aside>
-        )}
-        <main className={`flex-1 p-6 ${sidebar ? '' : 'container mx-auto'}`}>
-          <ErrorBoundary>{children}</ErrorBoundary>
+    <div className="bg-background flex h-screen overflow-hidden">
+      {/* Sidebar - Full Height */}
+      {showSidebar && (
+        <aside className="flex-shrink-0">
+          <Sidebar />
+        </aside>
+      )}
+
+      {/* Main Area (Header + Content) */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Header */}
+        <Header />
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto bg-gray-50">
+          <div className="container mx-auto px-6 py-6">
+            <ErrorBoundary>
+              <React.Suspense fallback={<LoadingPage />}>{children}</React.Suspense>
+            </ErrorBoundary>
+          </div>
         </main>
       </div>
     </div>
@@ -58,7 +75,9 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
             {description && <p className="text-gray-600">{description}</p>}
           </div>
         )}
-        <ErrorBoundary>{children}</ErrorBoundary>
+        <ErrorBoundary>
+          <React.Suspense fallback={<LoadingPage />}>{children}</React.Suspense>
+        </ErrorBoundary>
       </div>
     </div>
   );

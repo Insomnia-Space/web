@@ -1,0 +1,256 @@
+// app/(main)/recommendation-history/[id]/page.tsx
+
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { DashboardLayout } from '@/components/layout/Layouts';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchRecommendationDetail } from '@/store/slices/recommendationSlice';
+import { LoadingSpinner } from '@/components/loading-spinner';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, User, Calendar, Clock, Cpu, Repeat } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { RecommendationProductList } from './components/RecommendationProductList';
+import { OverrideRecommendationModal } from './components/OverrideRecommendationModal';
+
+const statusColors = {
+  sent: 'bg-green-100 text-green-700',
+  draft: 'bg-yellow-100 text-yellow-700',
+  pending: 'bg-blue-100 text-blue-700',
+};
+
+export default function RecommendationDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { selectedItem: recommendation, loading, error } = useAppSelector(
+    (state) => state.recommendation
+  );
+
+  const [showOverrideModal, setShowOverrideModal] = useState(false);
+
+  useEffect(() => {
+    if (params.id) {
+      dispatch(fetchRecommendationDetail(params.id as string));
+    }
+  }, [dispatch, params.id]);
+
+  if (loading && !recommendation) {
+    return (
+      <DashboardLayout>
+        <div className="flex min-h-[400px] items-center justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="flex min-h-[400px] items-center justify-center">
+          <Card className="w-full max-w-md text-center">
+            <CardHeader>
+              <CardTitle className="text-red-600">Error</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4 text-gray-600">{error}</p>
+              <Button onClick={() => router.push('/recommendation-history')}>
+                Back to List
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!recommendation) {
+    return null;
+  }
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50 p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => router.push('/recommendation-history')}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="mb-1 text-2xl font-bold tracking-tight text-gray-800">
+                Recommendation Detail
+              </h1>
+              <p className="font-mono text-sm text-gray-600">ID: {recommendation.id}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge
+              className={cn('text-sm font-semibold capitalize', statusColors[recommendation.status])}
+            >
+              {recommendation.status}
+            </Badge>
+            {recommendation.is_overridden === 1 && (
+              <Badge variant="outline" className="gap-1 text-sm">
+                <Repeat className="h-3 w-3" />
+                Overridden
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        {/* Info Cards */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Customer</p>
+                  <h3 className="mt-1 text-lg font-bold text-gray-900">
+                    {recommendation.customer_name}
+                  </h3>
+                  <p className="mt-0.5 font-mono text-xs text-gray-500">
+                    {recommendation.customer_id}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-blue-100 p-3">
+                  <User className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Generated By</p>
+                  <h3 className="mt-1 text-lg font-bold text-gray-900">
+                    {recommendation.staff_name}
+                  </h3>
+                  <p className="mt-0.5 font-mono text-xs text-gray-500">Staff Member</p>
+                </div>
+                <div className="rounded-xl bg-green-100 p-3">
+                  <User className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Model</p>
+                  <h3 className="mt-1 font-mono text-lg font-bold text-gray-900">
+                    {recommendation.model_version}
+                  </h3>
+                  <p className="mt-0.5 text-xs text-gray-500">{recommendation.algorithm}</p>
+                </div>
+                <div className="rounded-xl bg-purple-100 p-3">
+                  <Cpu className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Processing Time</p>
+                  <h3 className="mt-1 text-lg font-bold text-gray-900">
+                    {recommendation.processing_time_ms}ms
+                  </h3>
+                  <p className="mt-0.5 text-xs text-gray-500">Execution time</p>
+                </div>
+                <div className="rounded-xl bg-yellow-100 p-3">
+                  <Clock className="h-6 w-6 text-yellow-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Dates */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              Timeline
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Created At</p>
+                <p className="mt-1 text-base font-bold text-gray-900">
+                  {format(new Date(recommendation.created_at), 'PPpp')}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Last Updated</p>
+                <p className="mt-1 text-base font-bold text-gray-900">
+                  {format(new Date(recommendation.updated_at), 'PPpp')}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Override Info */}
+        {recommendation.is_overridden === 1 && (
+          <Card className="border-orange-200 bg-orange-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg text-orange-700">
+                <Repeat className="h-5 w-5" />
+                Override Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div>
+                  <p className="text-sm font-medium text-orange-600">Reason</p>
+                  <p className="mt-1 text-gray-900">
+                    {recommendation.override_reason || 'No reason provided'}
+                  </p>
+                </div>
+                {recommendation.override_product_id && (
+                  <div>
+                    <p className="text-sm font-medium text-orange-600">Override Product ID</p>
+                    <p className="mt-1 font-mono text-sm text-gray-900">
+                      {recommendation.override_product_id}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Recommended Products */}
+        <RecommendationProductList
+          products={recommendation.recommendations}
+          onOverride={() => setShowOverrideModal(true)}
+          canOverride={recommendation.is_overridden === 0 && recommendation.status !== 'sent'}
+        />
+
+        {/* Override Modal */}
+        <OverrideRecommendationModal
+          isOpen={showOverrideModal}
+          onClose={() => setShowOverrideModal(false)}
+          recommendationId={recommendation.id}
+        />
+      </div>
+    </DashboardLayout>
+  );
+}

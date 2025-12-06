@@ -54,6 +54,7 @@ export function checkUserRole(userRole: string, requiredRole: string | string[])
  * Utility to handle API errors consistently
  */
 export function handleApiError(error: unknown) {
+  // eslint-disable-next-line no-console
   console.error('API Error:', error);
 
   if (error instanceof Error) {
